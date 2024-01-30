@@ -111,12 +111,6 @@ paths:
                 }
         400:
           $ref: "#/components/responses/BadRequestErrorResponse"
-        401:
-          $ref: "#/components/responses/UnauthorizedResponse"
-        403:
-          $ref: "#/components/responses/ForbiddenResponse"
-        419:
-          $ref: "#/components/responses/AuthenticationTimeoutResponse"
         503:
           $ref: "#/components/responses/ServiceUnavailableResponse"
         5XX:
@@ -155,10 +149,6 @@ paths:
           $ref: "#/components/responses/ListNamespacesResponse"
         400:
           $ref: "#/components/responses/BadRequestErrorResponse"
-        401:
-          $ref: "#/components/responses/UnauthorizedResponse"
-        403:
-          $ref: "#/components/responses/ForbiddenResponse"
         404:
           description: Not Found - Namespace provided in the `parent` query parameter is not found.
           content:
@@ -168,8 +158,6 @@ paths:
               examples:
                 NoSuchNamespaceExample:
                   $ref: "#/components/examples/NoSuchNamespaceError"
-        419:
-          $ref: "#/components/responses/AuthenticationTimeoutResponse"
         503:
           $ref: "#/components/responses/ServiceUnavailableResponse"
         5XX:
@@ -192,10 +180,6 @@ paths:
           $ref: "#/components/responses/CreateNamespaceResponse"
         400:
           $ref: "#/components/responses/BadRequestErrorResponse"
-        401:
-          $ref: "#/components/responses/UnauthorizedResponse"
-        403:
-          $ref: "#/components/responses/ForbiddenResponse"
         406:
           $ref: "#/components/responses/UnsupportedOperationResponse"
         409:
@@ -207,8 +191,6 @@ paths:
               examples:
                 NamespaceAlreadyExists:
                   $ref: "#/components/examples/NamespaceAlreadyExistsError"
-        419:
-          $ref: "#/components/responses/AuthenticationTimeoutResponse"
         503:
           $ref: "#/components/responses/ServiceUnavailableResponse"
         5XX:
@@ -230,10 +212,6 @@ paths:
           $ref: "#/components/responses/GetNamespaceResponse"
         400:
           $ref: "#/components/responses/BadRequestErrorResponse"
-        401:
-          $ref: "#/components/responses/UnauthorizedResponse"
-        403:
-          $ref: "#/components/responses/ForbiddenResponse"
         404:
           description: Not Found - Namespace not found
           content:
@@ -243,8 +221,6 @@ paths:
               examples:
                 NoSuchNamespaceExample:
                   $ref: "#/components/examples/NoSuchNamespaceError"
-        419:
-          $ref: "#/components/responses/AuthenticationTimeoutResponse"
         503:
           $ref: "#/components/responses/ServiceUnavailableResponse"
         5XX:
@@ -261,10 +237,6 @@ paths:
           description: Success, no content
         400:
           $ref: "#/components/responses/BadRequestErrorResponse"
-        401:
-          $ref: "#/components/responses/UnauthorizedResponse"
-        403:
-          $ref: "#/components/responses/ForbiddenResponse"
         404:
           description: Not Found - Namespace not found
           content:
@@ -274,8 +246,6 @@ paths:
               examples:
                 NoSuchNamespaceExample:
                   $ref: "#/components/examples/NoSuchNamespaceError"
-        419:
-          $ref: "#/components/responses/AuthenticationTimeoutResponse"
         503:
           $ref: "#/components/responses/ServiceUnavailableResponse"
         5XX:
@@ -291,10 +261,6 @@ paths:
           description: Success, no content
         400:
           $ref: "#/components/responses/BadRequestErrorResponse"
-        401:
-          $ref: "#/components/responses/UnauthorizedResponse"
-        403:
-          $ref: "#/components/responses/ForbiddenResponse"
         404:
           description: Not Found - Namespace to delete does not exist.
           content:
@@ -304,8 +270,6 @@ paths:
               examples:
                 NoSuchNamespaceExample:
                   $ref: "#/components/examples/NoSuchNamespaceError"
-        419:
-          $ref: "#/components/responses/AuthenticationTimeoutResponse"
         503:
           $ref: "#/components/responses/ServiceUnavailableResponse"
         5XX:
@@ -341,10 +305,6 @@ paths:
           $ref: "#/components/responses/UpdateNamespacePropertiesResponse"
         400:
           $ref: "#/components/responses/BadRequestErrorResponse"
-        401:
-          $ref: "#/components/responses/UnauthorizedResponse"
-        403:
-          $ref: "#/components/responses/ForbiddenResponse"
         404:
           description: Not Found - Namespace not found
           content:
@@ -365,8 +325,6 @@ paths:
               examples:
                 UnprocessableEntityDuplicateKey:
                   $ref: "#/components/examples/UnprocessableEntityDuplicateKey"
-        419:
-          $ref: "#/components/responses/AuthenticationTimeoutResponse"
         503:
           $ref: "#/components/responses/ServiceUnavailableResponse"
         5XX:
@@ -388,10 +346,6 @@ paths:
           $ref: "#/components/responses/ListTablesResponse"
         400:
           $ref: "#/components/responses/BadRequestErrorResponse"
-        401:
-          $ref: "#/components/responses/UnauthorizedResponse"
-        403:
-          $ref: "#/components/responses/ForbiddenResponse"
         404:
           description: Not Found - The namespace specified does not exist
           content:
@@ -401,8 +355,6 @@ paths:
               examples:
                 NamespaceNotFound:
                   $ref: "#/components/examples/NoSuchNamespaceError"
-        419:
-          $ref: "#/components/responses/AuthenticationTimeoutResponse"
         503:
           $ref: "#/components/responses/ServiceUnavailableResponse"
         5XX:
@@ -436,10 +388,6 @@ paths:
           $ref: "#/components/responses/CreateTableResponse"
         400:
           $ref: "#/components/responses/BadRequestErrorResponse"
-        401:
-          $ref: "#/components/responses/UnauthorizedResponse"
-        403:
-          $ref: "#/components/responses/ForbiddenResponse"
         404:
           description: Not Found - The namespace specified does not exist
           content:
@@ -458,8 +406,6 @@ paths:
               examples:
                 NamespaceAlreadyExists:
                   $ref: "#/components/examples/TableAlreadyExistsError"
-        419:
-          $ref: "#/components/responses/AuthenticationTimeoutResponse"
         503:
           $ref: "#/components/responses/ServiceUnavailableResponse"
         5XX:
@@ -487,10 +433,6 @@ paths:
           $ref: "#/components/responses/LoadTableResponse"
         400:
           $ref: "#/components/responses/BadRequestErrorResponse"
-        401:
-          $ref: "#/components/responses/UnauthorizedResponse"
-        403:
-          $ref: "#/components/responses/ForbiddenResponse"
         404:
           description: Not Found - The namespace specified does not exist
           content:
@@ -509,8 +451,6 @@ paths:
               examples:
                 NamespaceAlreadyExists:
                   $ref: "#/components/examples/TableAlreadyExistsError"
-        419:
-          $ref: "#/components/responses/AuthenticationTimeoutResponse"
         503:
           $ref: "#/components/responses/ServiceUnavailableResponse"
         5XX:
@@ -560,10 +500,6 @@ paths:
           $ref: "#/components/responses/LoadTableResponse"
         400:
           $ref: "#/components/responses/BadRequestErrorResponse"
-        401:
-          $ref: "#/components/responses/UnauthorizedResponse"
-        403:
-          $ref: "#/components/responses/ForbiddenResponse"
         404:
           description: Not Found - NoSuchTableException, table to load does not exist
           content:
@@ -573,8 +509,6 @@ paths:
               examples:
                 TableToLoadDoesNotExist:
                   $ref: "#/components/examples/NoSuchTableError"
-        419:
-          $ref: "#/components/responses/AuthenticationTimeoutResponse"
         503:
           $ref: "#/components/responses/ServiceUnavailableResponse"
         5XX:
@@ -612,10 +546,6 @@ paths:
           $ref: "#/components/responses/CommitTableResponse"
         400:
           $ref: "#/components/responses/BadRequestErrorResponse"
-        401:
-          $ref: "#/components/responses/UnauthorizedResponse"
-        403:
-          $ref: "#/components/responses/ForbiddenResponse"
         404:
           description: Not Found - NoSuchTableException, table to load does not exist
           content:
@@ -631,8 +561,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IcebergErrorResponse"
-        419:
-          $ref: "#/components/responses/AuthenticationTimeoutResponse"
         500:
           description: An unknown server-side problem occurred; the commit state is unknown.
           content:
@@ -715,10 +643,6 @@ paths:
           description: Success, no content
         400:
           $ref: "#/components/responses/BadRequestErrorResponse"
-        401:
-          $ref: "#/components/responses/UnauthorizedResponse"
-        403:
-          $ref: "#/components/responses/ForbiddenResponse"
         404:
           description: Not Found - NoSuchTableException, Table to drop does not exist
           content:
@@ -728,8 +652,6 @@ paths:
               examples:
                 TableToDeleteDoesNotExist:
                   $ref: "#/components/examples/NoSuchTableError"
-        419:
-          $ref: "#/components/responses/AuthenticationTimeoutResponse"
         503:
           $ref: "#/components/responses/ServiceUnavailableResponse"
         5XX:
@@ -746,10 +668,6 @@ paths:
           description: Success, no content
         400:
           $ref: "#/components/responses/BadRequestErrorResponse"
-        401:
-          $ref: "#/components/responses/UnauthorizedResponse"
-        403:
-          $ref: "#/components/responses/ForbiddenResponse"
         404:
           description: Not Found - NoSuchTableException, Table not found
           content:
@@ -759,8 +677,6 @@ paths:
               examples:
                 TableToLoadDoesNotExist:
                   $ref: "#/components/examples/NoSuchTableError"
-        419:
-          $ref: "#/components/responses/AuthenticationTimeoutResponse"
         503:
           $ref: "#/components/responses/ServiceUnavailableResponse"
         5XX:
@@ -793,10 +709,6 @@ paths:
           description: Success, no content
         400:
           $ref: "#/components/responses/BadRequestErrorResponse"
-        401:
-          $ref: "#/components/responses/UnauthorizedResponse"
-        403:
-          $ref: "#/components/responses/ForbiddenResponse"
         404:
           description: Not Found
             - NoSuchTableException, Table to rename does not exist
@@ -820,8 +732,6 @@ paths:
                 $ref: "#/components/schemas/IcebergErrorResponse"
               example:
                 $ref: "#/components/examples/TableAlreadyExistsError"
-        419:
-          $ref: "#/components/responses/AuthenticationTimeoutResponse"
         503:
           $ref: "#/components/responses/ServiceUnavailableResponse"
         5XX:
@@ -850,10 +760,6 @@ paths:
           description: Success, no content
         400:
           $ref: "#/components/responses/BadRequestErrorResponse"
-        401:
-          $ref: "#/components/responses/UnauthorizedResponse"
-        403:
-          $ref: "#/components/responses/ForbiddenResponse"
         404:
           description: Not Found - NoSuchTableException, table to load does not exist
           content:
@@ -863,8 +769,6 @@ paths:
               examples:
                 TableToLoadDoesNotExist:
                   $ref: "#/components/examples/NoSuchTableError"
-        419:
-          $ref: "#/components/responses/AuthenticationTimeoutResponse"
         503:
           $ref: "#/components/responses/ServiceUnavailableResponse"
         5XX:
@@ -2318,42 +2222,6 @@ components:
 
     #  Note that this is a representative example response for use as a shorthand in the spec.
     #  The fields `message` and `type` as indicated here are not presently prescriptive.
-    UnauthorizedResponse:
-      description: Unauthorized. Authentication is required and has failed or has not yet been provided.
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/IcebergErrorResponse"
-          example:
-            {
-              "error":
-                {
-                  "message": "Not authorized to make this request",
-                  "type": "NotAuthorizedException",
-                  "code": 401,
-                },
-            }
-
-    #  Note that this is a representative example response for use as a shorthand in the spec.
-    #  The fields `message` and `type` as indicated here are not presently prescriptive.
-    ForbiddenResponse:
-      description: Forbidden. Authenticated user does not have the necessary permissions.
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/IcebergErrorResponse"
-          example:
-            {
-              "error":
-                {
-                  "message": "Not authorized to make this request",
-                  "type": "NotAuthorizedException",
-                  "code": 403,
-                },
-            }
-
-    #  Note that this is a representative example response for use as a shorthand in the spec.
-    #  The fields `message` and `type` as indicated here are not presently prescriptive.
     UnsupportedOperationResponse:
       description: Not Acceptable / Unsupported Operation. The server does not support this operation.
       content:
@@ -2433,22 +2301,6 @@ components:
               $ref: "#/components/examples/ListNamespacesNonEmptyExample"
             EmptyResponse:
               $ref: "#/components/examples/ListNamespacesEmptyExample"
-
-    AuthenticationTimeoutResponse:
-      description: Credentials have timed out. If possible, the client should refresh credentials and retry.
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/IcebergErrorResponse"
-          example:
-            {
-              "error":
-                {
-                  "message": "Credentials have timed out",
-                  "type": "AuthenticationTimeoutException",
-                  "code": 419,
-                },
-            }
 
     ServiceUnavailableResponse:
       description:
