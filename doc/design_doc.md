@@ -16,7 +16,7 @@
   * Data durability mechanisms will be implemented to prevent data loss during restarts.
 * Performance:
   * Optimization on data retrieval and storage strategies to minimize latency in metadata access.
-  * Efficient indexing mechanisms, such as Bloom filters, enhance query performance to speed up metadata search operations.
+  * Efficient indexing mechanisms, such as Bloom filters, enhance query performance.
   * Partitioning strategies facilitate data pruning and improve query execution performance.
 * Engineering Complexity / Maintainability:
   * Centralized metadata management achieved by separating data and metadata, reducing complexity and facilitating consistent metadata handling.
