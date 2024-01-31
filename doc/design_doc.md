@@ -15,16 +15,15 @@
   * The catalog service ensures data consistency and correctness by adhering to the Iceberg Catalog REST interface.
   * Data durability mechanisms will be implemented to prevent data loss during restarts.
 * Performance:
-  * Optimized data retrieval and storage strategies to minimize latency in metadata access.
-  * Efficient indexing mechanisms to speed up metadata search operations.
-  * Caching strategies to reduce redundant metadata queries and enhance overall performance.
+  * Optimization on data retrieval and storage strategies to minimize latency in metadata access.
+  * Efficient indexing mechanisms, such as Bloom filters, enhance query performance to speed up metadata search operations.
+  * Partitioning strategies facilitate data pruning and improve query execution performance.
 * Engineering Complexity / Maintainability:
-  * The microservices architecture simplifies maintenance by encapsulating each building block.
+  * Centralized metadata management achieved by separating data and metadata, reducing complexity and facilitating consistent metadata handling.
   * Code modularity and clear interfaces facilitate easier updates and improvements.
 * Testing:
   * Comprehensive testing plans cover correctness through unit tests and performance through long-running regression tests. Unit tests focus on individual components of the catalog service, while regression tests evaluate system-wide performance and stability.
 * Other Implementations:
-  * Considered alternative implementations, including a monolithic catalog structure and alternative REST specifications.
   * Chose the Iceberg Catalog REST interface due to its industry adoption, standardization, and compatibility with various systems.
 
 ## Testing Plan
