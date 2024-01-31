@@ -32,10 +32,10 @@ To ensure the quality and the performance of the catalog implemented, a comprehe
 
 * Functional testing
   * API tests: For functional testing, we can achieve the goal through unit tests. We will test each API endpoint implemented in our project to ensure correct behavior. We will test various input parameters and validate the response format and the status code are as expected. Also, we will try to mimic possible edge cases and errors to ensure the implementation is robust and can perform suitable error handling. By doing so, we can ensure the API works as expected and provides correct results to clients. 
-  * Metadata tests: We will focus on verifying the correct storage and retrieval of metadata. Tests will include different scenarios, including some edge cases.
-  * Consistency tests: We will test the scenarios where numerous operations are operated at the same time. We will ensure that even in complicated situations, our implementation maintains data consistency with absolute correctness.
+  * Metadata tests: We will focus on verifying the correct storage and retrieval of metadata. Tests will include different scenarios, including some edge cases. [Quickcheck](https://github.com/BurntSushi/quickcheck) is an example for performing the testing.
+  * [Documentation tests](https://doc.rust-lang.org/rustdoc/write-documentation/documentation-tests.html#documentation-tests): Execute document examples 
 * Non-functional testing
-  * Performance evaluation: We will set up a performance baseline to compare the performance of our implementation. We can measure different metrics, for example, response time, throughput, etc.
+  * Microbenchmarking for performance evaluation: We can use [Criterion.rs](https://github.com/bheisler/criterion.rs?tab=readme-ov-file#features) and [bencher](https://github.com/bluss/bencher) to collect statistics to enable statistics-driven optimizations. In addition, we can set up a performance baseline to compare the performance with our implementation. We can measure different metrics, for example, response time, throughput, etc. Additionally, 
   * Scalability test: We will try to test our implementation under increased load and ensure the correctness and efficiency at the same time.
 
 ## Trade-offs and Potential Problems
