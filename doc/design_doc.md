@@ -39,7 +39,7 @@ To ensure the quality and the performance of the catalog implemented, a comprehe
 
 ## Trade-offs and Potential Problems
 * Balancing between metadata retrieval speed and storage efficiency.
-* Striking a balance between query performance and resource utilization.
+* Balancing between query performance and engineering complexity/maintainability (such as adding bloom filters).
 
 ## Glossary (Optional)
 >If you are introducing new concepts or giving unintuitive names to components, write them down here.
