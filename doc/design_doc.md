@@ -11,7 +11,7 @@ The goal of this project is to design and implement a **Catalog Service** for an
 We follow the logic model described below. The input of our service comes from execution engine and I/O service. And we will provide metadata to planner and scheduler.
 ![system architecture](./assets/system-architecture.png)
 ### Data Model
-We adhere to the Iceberg data model, arranging tables based on namespaces, with each table uniquely identified by its name. <strike>Our goal is to enable multi-versioning, facilitating point-in-time queries and allowing for queries at a specific historical version of the table.</strike>
+We adhere to the Iceberg data model, arranging tables based on namespaces, with each table uniquely identified by its name.
 
 For every table in the catalog, there is an associated metadata file. This file contains a collection of manifests, each of which references the table's information at different points in time. The manifest file is an in-memory, non-persistent component that gets recreated based on on-disk files during service restarts. (If it is not frequently updated, we could dump it to disk every time we update it)
 
