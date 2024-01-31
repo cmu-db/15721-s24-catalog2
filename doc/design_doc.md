@@ -11,8 +11,6 @@
 >Explain the input and output of the component, describe interactions and breakdown the smaller components if any. Include diagrams if appropriate.
 
 ## Design Rationale
->Explain the goals of this design and how the design achieves these goals. Present alternatives considered and document why they are not chosen.
-
 * Correctness:
   * The catalog service ensures data consistency and correctness by adhering to the Iceberg Catalog REST interface.
   * Data durability mechanisms will be implemented to prevent data loss during restarts.
@@ -30,8 +28,6 @@
   * Chose the Iceberg Catalog REST interface due to its industry adoption, standardization, and compatibility with various systems.
 
 ## Testing Plan
->How should the component be tested?
-
 To ensure the quality and the performance of the catalog implemented, a comprehensive testing strategy is a must. Our testing strategy will include both functional and non-functional aspects of our catalog service. 
 
 * Functional testing
@@ -43,8 +39,6 @@ To ensure the quality and the performance of the catalog implemented, a comprehe
   * Scalability test: We will try to test our implementation under increased load and ensure the correctness and efficiency at the same time.
 
 ## Trade-offs and Potential Problems
->Write down any conscious trade-off you made that can be problematic in the future, or any problems discovered during the design process that remain unaddressed (technical debts).
-
 * Balancing between metadata retrieval speed and storage efficiency.
 * Striking a balance between query performance and resource utilization.
 
