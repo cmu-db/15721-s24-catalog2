@@ -15,17 +15,17 @@
 # specific language governing permissions and limitations
 # under the License.
 
-[workspace]
-resolver = "2"
-members = ["crates/haha", "crates/rest"]
+[package]
+name = "haha-rest"
+version = { workspace = true }
+edition = { workspace = true }
 
-[workspace.package]
-version = "0.0.1"
-edition = "2021"
-license = "Apache-2.0"
+categories = ["database"]
+description = "HAHA catalog service REST API"
+repository = { workspace = true }
+license = { workspace = true }
+keywords = ["haha-rest"]
 
-repository = "https://github.com/cmu-db/15721-s24-catalog2"
+[dependencies]
 
-[workspace.dependencies]
-haha = { path = "./crates/haha" }
-haha-rest = { path = "./crates/rest" }
+[dev-dependencies]
