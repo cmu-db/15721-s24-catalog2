@@ -1,8 +1,15 @@
 [package]
-name = "catalog2"
+name = "catalog-service"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+
+# [workspace]
+# members = ["libs/iceberg", "libs/rest", "libs/test_utils"]
+
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
+iceberg = { path = "./libs/iceberg" }
+iceberg_catalog_rest = { path = "./libs/rest" }
+iceberg_test_utils = { path = "./libs/test_utils" }

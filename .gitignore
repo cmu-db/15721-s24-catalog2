@@ -15,3 +15,5 @@ Cargo.lock
 
 # macOS resource forks and .DS_Store files
 .DS_Store
+
+.vscode
