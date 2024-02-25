@@ -96,5 +96,11 @@ impl Database {
     }
 
 
+    fn list_tables(&self) -> Vec<&str> {
+        let table_names_lock = self.table_names.lock().unwrap();
+
+        table_names_lock.keys().map(|name| name.as_str()).collect()
+    }
+
 }
 
