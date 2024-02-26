@@ -8,7 +8,7 @@
 ### Goal
 The goal of this project is to design and implement a **Catalog Service** for an OLAP database system. The Catalog aims for managing metadata and providing a centralized repository for storing information about the structure and organization of data within the OLAP database. This project aims to produce a functional catalog that adheres to [the Iceberg catalog specification](https://iceberg.apache.org/spec/) exposed through [REST API](https://github.com/apache/iceberg/blob/main/open-api/rest-catalog-open-api.yaml).
 ## Architectural Design
-We follow the logic model described below. The input of our service comes from execution engine and I/O service. And we will provide metadata to planner and scheduler. We will use pickleDB as the key-value store to store (namespace, tables) and (table_name, metadata) as two (key, value) pairs as local db files. [TODO: server part]
+We follow the logic model described below. The input of our service comes from execution engine and I/O service. And we will provide metadata to planner and scheduler. We will use [pickleDB](https://docs.rs/pickledb/latest/pickledb/) as the key-value store to store (namespace, tables) and (table_name, metadata) as two (key, value) pairs as local db files. [TODO: server part]
 ![system architecture](./assets/system-architecture.png)
 ### Data Model
 We adhere to the Iceberg data model, arranging tables based on namespaces, with each table uniquely identified by its name.
@@ -33,7 +33,7 @@ get metadeta by {namespace}/{table}
 * Engineering Complexity / Maintainability:
   * Centralized metadata management achieved by separating data and metadata, reducing complexity and facilitating consistent metadata handling.
   * Code modularity and clear interfaces facilitate easier updates and improvements.
-  * We adopt the existing kvstore (pickleDB) and server (Rocket) to mitigate the engineering complexity.
+  * We adopt the existing kvstore ([pickleDB](https://docs.rs/pickledb/latest/pickledb/)) and server ([Rocket](https://github.com/rwf2/Rocket)) to mitigate the engineering complexity.
 * Testing:
   * Comprehensive testing plans cover correctness through unit tests and performance through long-running regression tests. Unit tests focus on individual components of the catalog service, while regression tests evaluate system-wide performance and stability.
 * Other Implementations:
