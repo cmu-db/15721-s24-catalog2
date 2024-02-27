@@ -1,7 +1,10 @@
 /// List namespaces, optionally providing a parent namespace to list underneath
-#[get("/namespaces")]
-pub fn get_namespace() {
-  todo!("get_namespace")
+#[get("/namespaces?<parent..>")]
+pub fn get_namespace(parent: Option<String>) -> String {
+  // An optional namespace, underneath which to list namespaces.
+  // If not provided or empty, all top-level namespaces should be listed.
+  // If parent is a multipart namespace, the parts must be separated by the unit separator (`0x1F`) byte.
+  return format!("get_namespace({:?})", parent);
 }
 
 /// Create a namespace
