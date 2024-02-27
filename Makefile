@@ -22,6 +22,10 @@ RUST_LOG = debug
 build:
 	cargo build
 
+run:
+	cargo build
+	target/debug/catalog2
+
 check-fmt:
 	cargo fmt --all -- --check
 
