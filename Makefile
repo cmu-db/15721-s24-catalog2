@@ -15,19 +15,40 @@
 # specific language governing permissions and limitations
 # under the License.
 
-[package]
-name = "catalog2"
-version = "0.1.0"
-edition = "2021"
-license = "Apache-2.0"
-repository = "https://github.com/cmu-db/15721-s24-catalog2"
-rust-version = "1.75.0"
+.EXPORT_ALL_VARIABLES:
 
+RUST_LOG = debug
 
+build:
+	cargo build
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-[dependencies]
-rocket = { version = "0.5.0", features = ["json", "http2"] }
-iceberg = { src = "./libs/iceberg" }
-dotenv = "0.15.0"
-pickledb = "^0.5.0"
+run:
+	cargo build
+	target/debug/catalog2
+
+check-fmt:
+	cargo fmt --all -- --check
+
+check-clippy:
+	cargo clippy --all-targets --all-features --workspace -- -D warnings
+
+cargo-sort:
+	cargo install cargo-sort
+	cargo sort -c -w
+
+fix-toml:
+	cargo install taplo-cli --locked
+	taplo fmt
+
+check-toml:
+	cargo install taplo-cli --locked
+	taplo check
+
+check: check-fmt check-clippy cargo-sort check-toml
+
+unit-test:
+	cargo test --no-fail-fast --lib --all-features --workspace
+
+test:
+	cargo test --no-fail-fast --all-targets --all-features --workspace
+	cargo test --no-fail-fast --doc --all-features --workspace
