@@ -8,13 +8,14 @@
 ### Goal
 The goal of this project is to design and implement a **Catalog Service** for an OLAP database system. The Catalog aims for managing metadata and providing a centralized repository for storing information about the structure and organization of data within the OLAP database. This project aims to produce a functional catalog that adheres to [the Iceberg catalog specification](https://iceberg.apache.org/spec/) exposed through [REST API](https://github.com/apache/iceberg/blob/main/open-api/rest-catalog-open-api.yaml).
 ## Architectural Design
-We follow the logic model described below. The input of our service comes from execution engine and I/O service. And we will provide metadata to planner and scheduler. We will use [pickleDB](https://docs.rs/pickledb/latest/pickledb/) as the key-value store to store (namespace, tables) and (table_name, metadata) as two (key, value) pairs as local db files. [TODO: server part]
+We follow the logic model described below. The input of our service comes from execution engine and I/O service. And we will provide metadata to planner and scheduler. We will use [pickleDB](https://docs.rs/pickledb/latest/pickledb/) as the key-value store to store (namespace, tables) and (table_name, metadata) as two (key, value) pairs as local db files.
+We will use [Rocket](https://rocket.rs) as the web framework handling incoming API traffic.
 ![system architecture](./assets/system-architecture.png)
 ### Data Model
 We adhere to the Iceberg data model, arranging tables based on namespaces, with each table uniquely identified by its name.
 For every namespace in the database, there are associated list of tables.
 For every table in the catalog, there are associated metadata, including statistics, version, table-uuid, location, last-column-id, schema, and partition-spec.
-[TODO: data model (struct of metadata)]
+The parameters for request and response can be referenced from [REST API](https://github.com/apache/iceberg/blob/main/open-api/rest-catalog-open-api.yaml). We directly import Iceberg-Rust as a starting point.
 
 ### Use Cases
 #### Namespace
