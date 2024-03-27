@@ -1,34 +1,87 @@
 use rocket::http::Status;
 use rocket::response::{content, status};
+use rocket::serde::json::Json;
+use crate::response::*;
 
+// use rocket::serde::json::Json;
+// use rocket::Error;
 
-struct ErrorResponse {
-    error: String,
-}
 
 
 /// List all table identifiers underneath a given namespace
 #[get("/namespaces/<namespace>/tables")]
-pub fn get_table_by_namespace(namespace: &str) {
-  todo!("get_table_by_namespace")
+pub fn get_table_by_namespace(namespace: &str) -> (Status, Json<ListTablesResponse>) {
+  // todo!("get_table_by_namespace")
+  
+    // Initialize TableIdentifier instances
+    let identifiers = vec![
+        TableIdentifier {
+            namespace: Namespace(vec!["accounting".to_string(), "tax".to_string()]),
+            name: "paid".to_string(),
+        },
+        TableIdentifier {
+            namespace: Namespace(vec!["accounting".to_string(), "tax".to_string()]),
+            name: "owed".to_string(),
+        },
+    ];
+
+    // Create and return ListTablesResponse
+    let response = ListTablesResponse { identifiers };
+    (Status::Created, Json(response))
 }
 
 /// Create a table in the given namespace
 #[post("/namespaces/<namespace>/tables")]
-pub fn post_table_by_namespace(namespace: &str) {
-  todo!("post_table_by_namespace")
+pub fn post_table_by_namespace(namespace: &str) -> (Status, Json<LoadTableResult>) {
+    // todo!("post_table_by_namespace")
+    // Generate metadata for the newly created table
+    let metadata = TableMetadata {
+      format_version: 1,
+      table_uuid: "generated_uuid".to_string(),
+      // Fill in other fields as needed
+  };
+
+  // Construct the response
+  let load_table_result = LoadTableResult { metadata };
+
+  // Return the response as JSON
+  (Status::Created, Json(load_table_result))
 }
 
 /// Register a table in the given namespace using given metadata file location
 #[post("/namespaces/<namespace>/register")]
-pub fn register_table(namespace: &str) {
-  todo!("register_table")
+pub fn register_table(namespace: &str) -> (Status, Json<LoadTableResult>) {
+  // todo!("register_table")
+    // Generate metadata for the newly created table
+    let metadata = TableMetadata {
+      format_version: 1,
+      table_uuid: "generated_uuid".to_string(),
+      // Fill in other fields as needed
+  };
+
+  // Construct the response
+  let load_table_result = LoadTableResult { metadata };
+
+  // Return the response as JSON
+  (Status::Created, Json(load_table_result))
 }
 
 /// Load a table from the catalog
 #[get("/namespaces/<namespace>/tables/<table>")]
-pub fn get_table(namespace: &str, table: &str) {
-  todo!("post_namespace_table")
+pub fn get_table(namespace: &str, table: &str) -> (Status, Json<LoadTableResult>) {
+  // todo!("post_namespace_table")
+    // Generate metadata for the newly created table
+    let metadata = TableMetadata {
+      format_version: 1,
+      table_uuid: "generated_uuid".to_string(),
+      // Fill in other fields as needed
+  };
+
+  // Construct the response
+  let load_table_result = LoadTableResult { metadata };
+
+  // Return the response as JSON
+  (Status::Created, Json(load_table_result))
 }
 
 /// Commit updates to a table
