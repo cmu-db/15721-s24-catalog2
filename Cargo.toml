@@ -31,3 +31,4 @@ rocket = { version = "0.5.0", features = ["json", "http2"] }
 # iceberg = { src = "./libs/iceberg" }
 dotenv = "0.15.0"
 pickledb = "^0.5.0"
+lazy_static = "1.4.0"

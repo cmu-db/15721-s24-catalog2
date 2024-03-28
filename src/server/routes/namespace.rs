@@ -1,3 +1,12 @@
+use rocket::response::{content, status};
+use rocket::serde::json::Json;
+use rocket::http::{Status, ContentType};
+use rocket::serde::{Serialize, Deserialize};
+use std::collections::{HashMap, HashSet};
+use rocket::State;
+use crate::catalog;
+use crate::catalog::Catalog; 
+
 /// List namespaces, optionally providing a parent namespace to list underneath
 #[get("/namespaces?<parent..>")]
 pub fn get_namespace(parent: Option<String>) -> String {
@@ -9,8 +18,23 @@ pub fn get_namespace(parent: Option<String>) -> String {
 
 /// Create a namespace
 #[post("/namespaces")]
-pub fn post_namespace() {
-  todo!("post_namespace")
+pub fn post_namespace(catalog: &State<Catalog>) -> status::Custom<content::RawJson<&'static str>> {
+  // let test = catalog::Catalog{};
+  // test.post_namespace_func("test".to_string());
+  let catalog_instance = catalog.inner();
+  let (success, message) = catalog_instance.post_namespace_func("test".to_string());
+
+  if success{
+    status::Custom(Status::Ok, content::RawJson(""))
+  } else {
+    match &message[..3] {
+      "409" => status::Custom(Status::Conflict, content::RawJson("409 Conflict; Namespace already exists")),
+      "400" => status::Custom(Status::BadRequest, content::RawJson("400 Bad Request")),
+      _ => status::Custom(Status::InternalServerError, content::RawJson("Internal Server Error")),
+    }
+  }
+
+   // successful request 200
 }
 
 /// Check if a namespace exists

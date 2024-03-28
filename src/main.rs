@@ -4,9 +4,16 @@ extern crate rocket;
 mod server;
 use server::routes::*;
 
+mod catalog;
+use catalog::Catalog;
+
 #[launch]
 fn rocket() -> _ {
-  rocket::build().mount(
+  let catalog = Catalog::new();
+
+  rocket::build()
+  .manage(catalog)
+  .mount(
     "/v1",
     routes![
       namespace::get_namespace,
@@ -27,4 +34,6 @@ fn rocket() -> _ {
       config::get_config,
     ],
   )
+
+  
 }
