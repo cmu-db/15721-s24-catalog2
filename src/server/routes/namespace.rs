@@ -3,9 +3,26 @@ use rocket::serde::json::Json;
 use rocket::http::{Status, ContentType};
 use rocket::serde::{Serialize, Deserialize};
 use std::collections::{HashMap, HashSet};
-use rocket::State;
+// use rocket::State;
 use crate::catalog;
 use crate::catalog::Catalog; 
+use rocket::{State, data::FromData};
+use rocket::form::Form;
+// use serde::{Deserialize, Serialize};
+// use rocket::http::RawStr;
+// use rocket::form::{FromForm};
+// use rocket::form::{FromForm, Error as FormError};
+
+#[derive(Debug, Deserialize, Serialize)]
+struct Namespace {
+  name: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct CreateNamespaceRequest {
+    namespace: Namespace,
+    // properties: serde_json::Value, // We use serde_json::Value to represent arbitrary JSON properties
+}
 
 /// List namespaces, optionally providing a parent namespace to list underneath
 #[get("/namespaces?<parent..>")]
@@ -17,12 +34,14 @@ pub fn get_namespace(parent: Option<String>) -> String {
 }
 
 /// Create a namespace
-#[post("/namespaces")]
-pub fn post_namespace(catalog: &State<Catalog>) -> status::Custom<content::RawJson<&'static str>> {
+// #[post("/namespaces")]
+#[post("/namespaces", data = "<create_request>")]
+pub fn post_namespace(catalog: &State<Catalog>, create_request: Json<CreateNamespaceRequest>) -> status::Custom<content::RawJson<&'static str>> {
   // let test = catalog::Catalog{};
   // test.post_namespace_func("test".to_string());
   let catalog_instance = catalog.inner();
-  let (success, message) = catalog_instance.post_namespace_func("test".to_string());
+  let namespace_name = create_request.namespace.name.clone();
+  let (success, message) = catalog_instance.post_namespace_func(namespace_name.to_string());
 
   if success{
     status::Custom(Status::Ok, content::RawJson(""))
