@@ -1,9 +1,11 @@
 use std::{fmt, result};
 
 use derive_builder::Builder;
+use rocket::serde::Serialize;
 
 /// An enum that represents all types of errors that can occur when using calling catalog service.
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
+#[serde(crate = "rocket::serde")]
 pub enum ErrorType {
   BadRequest,
   NotFound,
@@ -13,20 +15,23 @@ pub enum ErrorType {
   InternalError,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
+#[serde(crate = "rocket::serde")]
 pub enum Location {
   DB,
   Namespace,
   Table,
 }
 
-#[derive(Builder)]
+#[derive(Builder, Serialize)]
 #[builder(setter(into))]
+#[serde(crate = "rocket::serde")]
 pub struct Error {
   // error type.
   pub error_type: ErrorType,
   // place where the error occurred.
   pub location: Location,
+  // error message.
   pub message: String,
 }
 

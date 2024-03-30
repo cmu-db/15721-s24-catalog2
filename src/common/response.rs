@@ -4,23 +4,33 @@ use crate::common::error::{Error, ErrorType};
 use rocket::{
   http::{ContentType, Status},
   response::{self, Responder},
+  serde::json::json,
   Request, Response,
 };
 
-// HTTP response builder for Error enum
-impl<'r> Responder<'r, 'static> for Error {
-  fn respond_to(self, _: &'r Request<'_>) -> response::Result<'static> {
-    let status = match self.error_type {
+impl ErrorType {
+  fn to_status(&self) -> Status {
+    match self {
       ErrorType::BadRequest => Status::BadRequest,
       ErrorType::NotFound => Status::NotFound,
       ErrorType::ServiceUnavailable => Status::ServiceUnavailable,
       ErrorType::AlreadyExists => Status::Conflict,
       ErrorType::Unprocessable => Status::UnprocessableEntity,
       ErrorType::InternalError => Status::InternalServerError,
-    };
+    }
+  }
+}
 
-    // Serialize the error data structure into JSON.
-    let body = "asd".to_owned();
+// HTTP response builder for Error enum
+impl<'r> Responder<'r, 'static> for Error {
+  fn respond_to(self, _: &'r Request<'_>) -> response::Result<'static> {
+    let status = self.error_type.to_status();
+    let body: String = json!({ "error": {
+      "code": status.code,
+      "type": self.error_type,
+      "message": self.message,
+    } })
+    .to_string();
 
     // Build and send the request.
     Response::build()
