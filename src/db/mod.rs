@@ -1,4 +1,4 @@
-use crate::common::error::{Code, Error, Result};
+use crate::common::error::{Error, ErrorBuilder, ErrorType, Location, Result};
 use pickledb::PickleDb;
 use rocket::serde::Serialize;
 
@@ -31,7 +31,11 @@ impl DBConnection {
   pub fn put<T: Serialize>(&mut self, key: &str, value: &T) -> Result<()> {
     match self.0.set(key, &value) {
       Ok(_) => Ok(()),
-      Err(e) => Err(Error::new(Code::Internal(e.to_string()))),
+      Err(e) => Err(Error {
+        error_type: ErrorType::InternalError,
+        location: Location::DB,
+        message: format!("Failed to put key: {}, error: {}", key, e),
+      }),
     }
   }
 

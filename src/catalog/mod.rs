@@ -1,3 +1,5 @@
+pub mod namespace;
+
 struct Catalog {}
 
 impl Catalog {
