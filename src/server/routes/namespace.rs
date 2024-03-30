@@ -1,5 +1,6 @@
 use crate::catalog::namespace::Namespace;
-use crate::common::error::{Error, ErrorType, Location, Result};
+use crate::common::error::{ErrorType, Location, Result};
+use crate::create_error;
 
 use rocket::{
   serde::{
@@ -14,11 +15,8 @@ use crate::db::DB;
 /// List namespaces, optionally providing a parent namespace to list underneath
 #[get("/?<parent..>")]
 pub async fn get(parent: Option<String>, db: &State<DB>) -> Result<()> {
-  // let conn = db.get_connection();
-  // Namespace::
-  // An optional namespace, underneath which to list namespaces.
-  // If not provided or empty, all top-level namespaces should be listed.
-  // If parent is a multipart namespace, the parts must be separated by the unit separator (`0x1F`) byte.
+  let conn = db.get_connection();
+  // Namespace::list(conn, parent).await?;
   todo!("get_namespace")
 }
 
@@ -32,20 +30,14 @@ pub fn post() {
 #[head("/<namespace>")]
 pub async fn head_by_name(namespace: &str, db: &State<DB>) -> Result<()> {
   let conn = db.get_connection();
-  let res = Namespace::exists(conn, namespace, None).await;
-  match res {
-    Ok(exists) => {
-      if exists {
-        Ok(())
-      } else {
-        Err(Error {
-          error_type: ErrorType::NotFound,
-          location: Location::Namespace,
-          message: format!("Namespace {} not found", namespace),
-        })
-      }
-    }
-    Err(e) => Err(e),
+  let exists = Namespace::exists(conn, namespace, None).await;
+  match exists {
+    true => Ok(()),
+    false => create_error!(
+      ErrorType::NotFound,
+      Location::Namespace,
+      format!("Namespace {} not found", namespace)
+    ),
   }
 }
 

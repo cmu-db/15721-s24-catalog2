@@ -40,3 +40,14 @@ impl<'r> Responder<'r, 'static> for Error {
       .ok()
   }
 }
+
+#[macro_export]
+macro_rules! create_error {
+  ($error_type:expr, $location:expr, $message:expr) => {
+    Err(crate::common::error::Error {
+      error_type: $error_type,
+      location: $location,
+      message: $message,
+    })
+  };
+}
