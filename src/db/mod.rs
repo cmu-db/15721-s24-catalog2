@@ -1,31 +1,59 @@
-use crate::common::error::{Error, ErrorBuilder, ErrorType, Location, Result};
+use crate::{
+  common::result::{Error, ErrorType, Location, Result},
+  err,
+};
 use pickledb::PickleDb;
 use rocket::serde::Serialize;
+use std::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 pub struct DB {
-  conn: DBConnection,
+  conn: RwLock<DBConnection>, // simple rw lock
 }
 
 impl DB {
-  pub fn get_connection(&self) -> &DBConnection {
-    &self.conn
+  pub fn get_read_conn(&self) -> Result<RwLockReadGuard<DBConnection>> {
+    let read_guard = self.conn.read();
+    if read_guard.is_err() {
+      return err!(
+        ErrorType::InternalError,
+        Location::DB,
+        "Failed to get read connection".to_owned()
+      );
+    }
+
+    Ok(read_guard.unwrap())
+  }
+
+  pub fn get_write_conn(&self) -> Result<RwLockWriteGuard<DBConnection>> {
+    let write_guard = self.conn.write();
+    if write_guard.is_err() {
+      return err!(
+        ErrorType::InternalError,
+        Location::DB,
+        "Failed to get write connection".to_owned()
+      );
+    }
+
+    Ok(write_guard.unwrap())
   }
 
   pub fn new() -> Result<DB> {
     let conn = DBConnection::new()?;
-    Ok(DB { conn })
+    Ok(DB {
+      conn: RwLock::new(conn),
+    })
   }
 }
 
 pub struct DBConnection(PickleDb);
 
 impl DBConnection {
-  pub fn exists(&self, key: &str) -> Result<bool> {
-    Ok(self.0.exists(key))
+  pub fn exists(&self, key: &str) -> bool {
+    self.0.exists(key)
   }
 
-  pub fn get(&self, key: &str) -> Result<Option<String>> {
-    Ok(self.0.get(key))
+  pub fn get<V: for<'de> rocket::serde::Deserialize<'de>>(&self, key: &str) -> Option<V> {
+    self.0.get(key)
   }
 
   pub fn put<T: Serialize>(&mut self, key: &str, value: &T) -> Result<()> {
@@ -42,14 +70,14 @@ impl DBConnection {
   fn new() -> Result<DBConnection> {
     // Load the database from disk, if no database exists, create a new one.
     match PickleDb::load(
-      "catalog.namespace",
+      "./database/catalog.namespace",
       pickledb::PickleDbDumpPolicy::AutoDump,
       pickledb::SerializationMethod::Json,
     ) {
       Ok(conn) => Ok(DBConnection(conn)),
       Err(_) => {
         let conn = PickleDb::new(
-          "catalog.namespace",
+          "./database/catalog.namespace",
           pickledb::PickleDbDumpPolicy::AutoDump,
           pickledb::SerializationMethod::Json,
         );

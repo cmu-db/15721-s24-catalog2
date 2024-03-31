@@ -1,11 +1,12 @@
 mod catalog;
 mod common;
 mod db;
+mod server;
+mod util;
 
 #[macro_use]
 extern crate rocket;
 
-mod server;
 use db::DB;
 use server::routes::*;
 

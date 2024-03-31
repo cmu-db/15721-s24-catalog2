@@ -1,7 +1,8 @@
 use std::{fmt, result};
 
 use derive_builder::Builder;
-use rocket::serde::Serialize;
+use rocket::serde::{json::Json, Serialize};
+use serde_json::Value;
 
 /// An enum that represents all types of errors that can occur when using calling catalog service.
 #[derive(Clone, Serialize)]
@@ -37,6 +38,8 @@ pub struct Error {
 
 // alias for Result with the error type.
 pub type Result<T> = result::Result<T, Error>;
+pub type JsonResult = Result<Json<Value>>;
+pub type EmptyResult = Result<()>;
 
 impl fmt::Display for Location {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

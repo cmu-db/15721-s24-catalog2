@@ -1,6 +1,6 @@
 use std::io::Cursor;
 
-use crate::common::error::{Error, ErrorType};
+use crate::common::result::{Error, ErrorType};
 use rocket::{
   http::{ContentType, Status},
   response::{self, Responder},
@@ -42,9 +42,9 @@ impl<'r> Responder<'r, 'static> for Error {
 }
 
 #[macro_export]
-macro_rules! create_error {
+macro_rules! err {
   ($error_type:expr, $location:expr, $message:expr) => {
-    Err(crate::common::error::Error {
+    Err(crate::common::result::Error {
       error_type: $error_type,
       location: $location,
       message: $message,
