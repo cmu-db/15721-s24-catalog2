@@ -7,8 +7,21 @@ mod util;
 #[macro_use]
 extern crate rocket;
 
+use common::result::EmptyResult;
 use db::DB;
+
 use server::routes::*;
+
+use crate::common::result::{ErrorType, Location};
+
+#[catch(404)]
+fn general_not_found() -> EmptyResult {
+  err!(
+    ErrorType::NotFound,
+    Location::DB,
+    "Resource not found, please check the URL".to_string()
+  )
+}
 
 #[launch]
 fn rocket() -> _ {
@@ -20,6 +33,7 @@ fn rocket() -> _ {
   rocket::build()
     .attach(namespace::stage())
     .manage(db.unwrap())
+    .register("/", catchers![general_not_found])
     .mount(
       "/v1",
       routes![
