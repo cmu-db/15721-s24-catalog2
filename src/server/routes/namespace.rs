@@ -72,7 +72,7 @@ pub async fn get(parent: &str, db: &State<DB>) -> JsonResult {
 }
 
 /// Create a namespace
-#[post("/namespaces", data = "<create_request>")]
+#[post("/", data = "<create_request>")]
 pub async fn post(create_request: Json<CreateNamespaceRequest>, db: &State<DB>) -> JsonResult {
   let mut conn = db.get_write_conn()?;
   let created_namespace = Namespace::create(
