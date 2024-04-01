@@ -1,5 +1,5 @@
 use rocket::serde::Serialize;
-
+use crate::server::routes::common::*;
 
 // #[get("/namespaces/<namespace>/tables")] --> 200: ListTablesResponse
 #[derive(Serialize)]
@@ -7,20 +7,6 @@ use rocket::serde::Serialize;
 pub struct ListTablesResponse {
     pub identifiers: Vec<TableIdentifier>,
 }
-
-#[derive(Serialize)]
-#[serde(crate = "rocket::serde")]
-pub struct TableIdentifier {
-    pub namespace: Namespace,
-    pub name: String,
-}
-
-#[derive(Serialize)]
-#[serde(crate = "rocket::serde")]
-pub struct Namespace(
-    pub Vec<String>
-);
-
 
 // #[post("/namespaces/<namespace>/tables")] --> 200: CreateTableResponse
 pub type CreateTableResponse = LoadTableResult;
@@ -60,6 +46,13 @@ pub struct TableMetadata {
     // pub metadata_log: MetadataLog,
 }
 
+
+#[derive(Serialize)]
+#[serde(crate = "rocket::serde")]
+pub struct CommitTableResponse {
+    pub metadata_location: String,
+    pub metadata: TableMetadata,
+}
 
 // 400: BadRequestErrorResponse
 // 404: IcebergErrorResponse

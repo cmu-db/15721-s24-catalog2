@@ -2,9 +2,10 @@ use rocket::http::Status;
 use rocket::response::{content, status};
 use rocket::serde::json::Json;
 use crate::response::*;
+use crate::request::*;
+use crate::server::routes::common::*;
 
-use crate::common::result::{self, EmptyResult, ErrorType, JsonResult, Location, Result};
-use crate::err;
+use crate::common::result::Result;
 
 // use rocket::serde::json::Json;
 // use rocket::Error;
@@ -34,8 +35,8 @@ pub fn get_table_by_namespace(namespace: &str) -> JsonResultGeneric<ListTablesRe
 }
 
 /// Create a table in the given namespace
-#[post("/namespaces/<namespace>/tables")]
-pub fn post_table_by_namespace(namespace: &str) -> JsonResultGeneric<CreateTableResponse> {
+#[post("/namespaces/<namespace>/tables", data = "<create_table_request>")]
+pub fn post_table_by_namespace(namespace: &str, create_table_request: Json<CreateTableRequest>) -> JsonResultGeneric<CreateTableResponse> {
   // Generate metadata for the newly created table
   let metadata = TableMetadata {
     format_version: 1,
@@ -51,8 +52,8 @@ pub fn post_table_by_namespace(namespace: &str) -> JsonResultGeneric<CreateTable
 }
 
 /// Register a table in the given namespace using given metadata file location
-#[post("/namespaces/<namespace>/register")]
-pub fn register_table(namespace: &str) -> JsonResultGeneric<LoadTableResponse> {
+#[post("/namespaces/<namespace>/register", data = "<register_table_request>")]
+pub fn register_table(namespace: &str, register_table_request: Json<RegisterTableRequest>) -> JsonResultGeneric<LoadTableResponse> {
   // Generate metadata for the newly created table
   let metadata = TableMetadata {
     format_version: 1,
@@ -85,8 +86,8 @@ pub fn get_table(namespace: &str, table: &str) -> JsonResultGeneric<LoadTableRes
 }
 
 /// Commit updates to a table
-#[post("/namespaces/<namespace>/tables/<table>")]
-pub fn post_table(namespace: &str, table: &str) -> status::Custom<content::RawJson<&'static str>> {
+#[post("/namespaces/<namespace>/tables/<table>", data = "<commit_table_request>")]
+pub fn post_table(namespace: &str, table: &str, commit_table_request: Json<CommitTableRequest>) -> status::Custom<content::RawJson<&'static str>> {
   let bad_request = namespace.is_empty() || table.is_empty();
   // let bad_request = true;
   let post_success = false;
@@ -113,8 +114,8 @@ pub fn post_table(namespace: &str, table: &str) -> status::Custom<content::RawJs
 }
 
 /// Drop a table from the catalog
-#[delete("/namespaces/<namespace>/tables/<table>")]
-pub fn delete_table(namespace: &str, table: &str) -> status::Custom<content::RawJson<&'static str>> {
+#[delete("/namespaces/<namespace>/tables/<table>?<purge_requested..>")]
+pub fn delete_table(namespace: &str, table: &str, purge_requested: PurgeRequested) -> status::Custom<content::RawJson<&'static str>> {
   // let bad_request = namespace.is_empty() || table.is_empty();
   let bad_request = true;
   let delete_success = true;
@@ -158,8 +159,8 @@ pub fn head_table(namespace: &str, table: &str) -> status::Custom<content::RawJs
 }
 
 /// Rename a table from its current name to a new name
-#[post("/tables/rename")]
-pub fn rename_table() -> status::Custom<content::RawJson<&'static str>> {
+#[post("/tables/rename", data = "<rename_table_request>")]
+pub fn rename_table(rename_table_request: Json<RenameTableRequest>) -> status::Custom<content::RawJson<&'static str>> {
   let bad_request = true;
   let table_renamed = false;
   let namespace_found = false;
