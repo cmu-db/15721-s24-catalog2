@@ -6,7 +6,7 @@ use crate::{
   util::time,
 };
 use rocket::serde::{Deserialize, Serialize};
-use serde_json::Value;
+use serde_json::{json, Value};
 
 use crate::db::DBConnection;
 
@@ -80,7 +80,7 @@ impl Namespace {
       );
     }
 
-    let mut old_properties = properties.unwrap_or_default();
+    let mut old_properties = properties.unwrap_or_else(|| json!({}));
     let new_properties = old_properties.as_object_mut().unwrap();
     new_properties.insert(
       "created_at".to_string(),
