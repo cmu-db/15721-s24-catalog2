@@ -23,8 +23,10 @@ pub struct Namespace(
 
 
 // #[post("/namespaces/<namespace>/tables")] --> 200: CreateTableResponse
+pub type CreateTableResponse = LoadTableResult;
 // #[post("/namespaces/<namespace>/register")] --> 200: LoadTableResponse
 // #[get("/namespaces/<namespace>/tables/<table>")] --> 200: LoadTableResponse
+pub type LoadTableResponse = LoadTableResult;
 // LoadTableResult
 #[derive(Serialize)]
 #[serde(crate = "rocket::serde")]
