@@ -18,8 +18,26 @@ use crate::common::result::{ErrorType, Location};
 fn general_not_found() -> EmptyResult {
   err!(
     ErrorType::NotFound,
-    Location::DB,
+    Location::Request,
     "Resource not found, please check the URL".to_string()
+  )
+}
+
+#[catch(400)]
+fn general_bad_request() -> EmptyResult {
+  err!(
+    ErrorType::BadRequest,
+    Location::Request,
+    "Bad Request".to_string()
+  )
+}
+
+#[catch(500)]
+fn general_internal_error() -> EmptyResult {
+  err!(
+    ErrorType::InternalError,
+    Location::Request,
+    "Internal server error".to_string()
   )
 }
 
@@ -33,7 +51,14 @@ fn rocket() -> _ {
   rocket::build()
     .attach(namespace::stage())
     .manage(db.unwrap())
-    .register("/", catchers![general_not_found])
+    .register(
+      "/",
+      catchers![
+        general_not_found,
+        general_bad_request,
+        general_internal_error
+      ],
+    )
     .mount(
       "/v1",
       routes![

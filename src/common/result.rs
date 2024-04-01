@@ -21,6 +21,7 @@ pub enum ErrorType {
 pub enum Location {
   DB,
   Namespace,
+  Request,
   Table,
 }
 
@@ -47,6 +48,7 @@ impl fmt::Display for Location {
       Location::Namespace => write!(f, "namespace"),
       Location::Table => write!(f, "table"),
       Location::DB => write!(f, "DB"),
+      Location::Request => write!(f, "request"),
     }
   }
 }
