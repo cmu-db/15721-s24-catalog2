@@ -1,28 +1,17 @@
-use rocket::http::Status;
-use rocket::response::{content, status};
-// use rocket::serde::json::Json;
-use crate::response::*;
 use crate::request::*;
 use crate::server::routes::common::*;
+use crate::{err, ok_empty, response::*};
+use rocket::http::Status;
+use rocket::response::{content, status};
+use rocket::serde::json::Json;
 
-use crate::common::result::{self, EmptyResult, ErrorType, JsonResult, Location, Result};
-use crate::{err, ok_empty, ok_json};
+use crate::common::result::{EmptyResult, ErrorType, Location, Result};
 // use rocket::serde::json::Json;
 // use rocket::Error;
 use crate::catalog::table::Table;
 use crate::catalog::namespace::Namespace;
 
-
 pub type JsonResultGeneric<T> = Result<Json<T>>;
-use rocket::{
-  serde::{
-    json::{json, Json, Value},
-    Deserialize,
-  },
-  State,
-};
-
-use crate::db::DB;
 
 
 fn hash<'a>(level: &Vec<String>) -> String {
@@ -101,7 +90,10 @@ pub fn post_table_by_namespace(namespace: &str, create_table_request: Json<Creat
 
 /// Register a table in the given namespace using given metadata file location
 #[post("/namespaces/<namespace>/register", data = "<register_table_request>")]
-pub fn register_table(namespace: &str, register_table_request: Json<RegisterTableRequest>) -> JsonResultGeneric<LoadTableResponse> {
+pub fn register_table(
+  namespace: &str,
+  register_table_request: Json<RegisterTableRequest>,
+) -> JsonResultGeneric<LoadTableResponse> {
   // Generate metadata for the newly created table
   let metadata = TableMetadata {
     format_version: 1,
@@ -156,7 +148,7 @@ pub fn post_table(namespace: &str, table: &str, commit_table_request: Json<Commi
   let response = CommitTableResponse {
     metadata,
     metadata_location: "".to_string(),
-   };
+  };
 
   // Return the response as JSON
   Ok(Json(response))
