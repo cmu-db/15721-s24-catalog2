@@ -1,22 +1,14 @@
-use std::rc::Rc;
-
 use crate::{
   common::result::{ErrorType, Location, Result},
   err,
   util::time,
 };
-use rocket::{
-  form::validate::len,
-  serde::{Deserialize, Serialize},
-};
+use rocket::serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
 use crate::db::DBConnection;
 
 pub type NamespaceIdent = String;
-pub type NamespaceIdentRef<'a> = &'a str;
-
-pub type NamespaceRef = Rc<Namespace>;
 
 // we store the namespace as a string, the value should contains all the parent namespaces
 // e.g. all the direct child to namespace A.B will be stored in the child field,
@@ -37,6 +29,24 @@ fn hash<'a>(level: &Vec<NamespaceIdent>) -> String {
 }
 
 impl Namespace {
+  pub fn init(conn: &mut DBConnection) -> Result<()> {
+    let key = "root";
+    match conn.exists(key) {
+      true => Ok(()),
+      false => {
+        let properties = json!({
+          "created_at": time::now().to_string(),
+        });
+        let namespace = Namespace {
+          child: vec![],
+          properties: properties,
+        };
+        conn.put(key, &namespace)?;
+        Ok(())
+      }
+    }
+  }
+
   // exist will not return an error
   pub fn exists(conn: &DBConnection, level: &Vec<NamespaceIdent>) -> bool {
     let key = hash(level);

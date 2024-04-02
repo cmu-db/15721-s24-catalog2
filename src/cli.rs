@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use clap::Parser;
 
-#[derive(Parser)]
+#[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 pub struct Cli {
   /// Sets the root of database

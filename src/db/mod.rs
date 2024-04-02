@@ -1,4 +1,5 @@
 use crate::{
+  catalog::namespace::Namespace,
   common::result::{Error, ErrorType, Location, Result},
   err,
 };
@@ -52,7 +53,8 @@ impl DB {
       }
     }
 
-    let conn = DBConnection::new()?;
+    let mut conn = DBConnection::new()?;
+    Namespace::init(&mut conn)?;
     Ok(DB {
       conn: RwLock::new(conn),
     })

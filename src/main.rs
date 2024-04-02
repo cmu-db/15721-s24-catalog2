@@ -13,7 +13,7 @@ use db::DB;
 use server::{catches, routes::*};
 
 #[launch]
-fn rocket() -> _ {
+pub fn rocket() -> _ {
   let cli = cli::parse();
 
   let db = DB::new(cli.db_root.unwrap());
