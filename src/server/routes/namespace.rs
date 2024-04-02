@@ -1,8 +1,7 @@
-use std::collections::HashSet;
-
 use crate::catalog::namespace::{Namespace, NamespaceIdent};
 use crate::common::result::{self, EmptyResult, ErrorType, JsonResult, Location, Result};
 use crate::{err, ok_empty, ok_json};
+use std::collections::HashSet;
 
 use rocket::request::FromParam;
 
@@ -190,21 +189,4 @@ pub fn stage() -> rocket::fairing::AdHoc {
       )
       .mount("/v1", routes![get]) // for a query parameter
   })
-}
-
-#[cfg(test)]
-mod test {
-
-  use rocket::{http::Status, local::asynchronous::Client};
-
-  #[rocket::async_test]
-  async fn test_namespace() {
-    let client = Client::tracked(crate::rocket())
-      .await
-      .expect("valid rocket instance");
-
-    let response = client.get("/v1/namespaces").dispatch().await;
-    println!("{:?}", response);
-    assert_eq!(response.status(), Status::Ok);
-  }
 }

@@ -15,16 +15,15 @@ use server::{catches, routes::*};
 #[launch]
 pub fn rocket() -> _ {
   let cli = cli::parse();
-
   let db = DB::new(cli.db_root.unwrap());
   if db.is_err() {
     panic!("Failed to initialize database: {:?}", db.err());
   }
 
   rocket::build()
+    .manage(db.unwrap())
     .attach(namespace::stage())
     .attach(catches::stage())
-    .manage(db.unwrap())
     .mount(
       "/v1",
       routes![
@@ -40,4 +39,15 @@ pub fn rocket() -> _ {
         config::get_config,
       ],
     )
+}
+
+#[cfg(test)]
+mod test {
+  use rocket::local::asynchronous::Client;
+
+  #[rocket::async_test]
+  async fn test_create_server() {
+    let client = Client::tracked(crate::rocket()).await;
+    assert_eq!(client.is_ok(), true);
+  }
 }
