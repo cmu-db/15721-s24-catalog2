@@ -1,5 +1,5 @@
-mod arg;
 mod catalog;
+mod cli;
 mod common;
 mod db;
 mod server;
@@ -14,7 +14,9 @@ use server::{catches, routes::*};
 
 #[launch]
 fn rocket() -> _ {
-  let db = DB::new();
+  let cli = cli::parse();
+
+  let db = DB::new(cli.db_root.unwrap());
   if db.is_err() {
     panic!("Failed to initialize database: {:?}", db.err());
   }

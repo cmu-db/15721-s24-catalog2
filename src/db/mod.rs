@@ -3,8 +3,10 @@ use crate::{
   err,
 };
 use pickledb::PickleDb;
+
 use rocket::serde::Serialize;
 use std::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
+use std::{fs, path::PathBuf};
 
 pub struct DB {
   conn: RwLock<DBConnection>, // simple rw lock
@@ -37,7 +39,19 @@ impl DB {
     Ok(write_guard.unwrap())
   }
 
-  pub fn new() -> Result<DB> {
+  pub fn new(root_dir: PathBuf) -> Result<DB> {
+    println!("starting db in {:?}", root_dir);
+    if !std::path::Path::new(&root_dir).exists() {
+      let res = fs::create_dir(root_dir);
+      if res.is_err() {
+        return err!(
+          ErrorType::InternalError,
+          Location::DB,
+          "Failed to create root directory".to_owned()
+        );
+      }
+    }
+
     let conn = DBConnection::new()?;
     Ok(DB {
       conn: RwLock::new(conn),

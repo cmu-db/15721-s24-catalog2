@@ -176,7 +176,7 @@ pub fn post_properties(
 }
 
 pub fn stage() -> rocket::fairing::AdHoc {
-  rocket::fairing::AdHoc::on_ignite("namespace", |rocket| async {
+  rocket::fairing::AdHoc::on_ignite("namespace routes", |rocket| async {
     rocket
       .mount(
         "/v1/namespaces",

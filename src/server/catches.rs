@@ -38,7 +38,7 @@ fn general_internal_error() -> EmptyResult {
 }
 
 pub fn stage() -> rocket::fairing::AdHoc {
-  rocket::fairing::AdHoc::on_ignite("namespace", |rocket| async {
+  rocket::fairing::AdHoc::on_ignite("error response guard", |rocket| async {
     rocket.register(
       "/",
       catchers![
