@@ -5,16 +5,16 @@ use rocket::serde::Deserialize;
 #[serde(crate = "rocket::serde")]
 // #[derive(serde::Deserialize)]
 pub struct CreateTableRequest {
-    pub name: String,
-    // location: Option<String>,
-    // schema: Schema,
-    // #[serde(rename = "partition-spec")]
-    // partition_spec: PartitionSpec,
-    // #[serde(rename = "write-order")]
-    // write_order: SortOrder,
-    // #[serde(rename = "stage-create")]
-    // stage_create: bool,
-    // properties: Option<HashMap<String, String>>,
+  pub name: String,
+  // location: Option<String>,
+  // schema: Schema,
+  // #[serde(rename = "partition-spec")]
+  // partition_spec: PartitionSpec,
+  // #[serde(rename = "write-order")]
+  // write_order: SortOrder,
+  // #[serde(rename = "stage-create")]
+  // stage_create: bool,
+  // properties: Option<HashMap<String, String>>,
 }
 
 #[derive(Deserialize)]
