@@ -1,4 +1,5 @@
 mod catalog;
+mod cli;
 mod common;
 mod db;
 mod server;
@@ -7,58 +8,22 @@ mod util;
 #[macro_use]
 extern crate rocket;
 
-use common::result::EmptyResult;
 use db::DB;
 
-use server::routes::*;
-
-use crate::common::result::{ErrorType, Location};
-
-#[catch(404)]
-fn general_not_found() -> EmptyResult {
-  err!(
-    ErrorType::NotFound,
-    Location::Request,
-    "Resource not found, please check the URL".to_string()
-  )
-}
-
-#[catch(400)]
-fn general_bad_request() -> EmptyResult {
-  err!(
-    ErrorType::BadRequest,
-    Location::Request,
-    "Bad Request".to_string()
-  )
-}
-
-#[catch(500)]
-fn general_internal_error() -> EmptyResult {
-  err!(
-    ErrorType::InternalError,
-    Location::Request,
-    "Internal server error".to_string()
-  )
-}
+use server::{catches, routes::*};
 
 #[launch]
-fn rocket() -> _ {
-  let db = DB::new();
+pub fn rocket() -> _ {
+  let cli = cli::parse();
+  let db = DB::new(cli.db_root.unwrap());
   if db.is_err() {
     panic!("Failed to initialize database: {:?}", db.err());
   }
 
   rocket::build()
-    .attach(namespace::stage())
     .manage(db.unwrap())
-    .register(
-      "/",
-      catchers![
-        general_not_found,
-        general_bad_request,
-        general_internal_error
-      ],
-    )
+    .attach(namespace::stage())
+    .attach(catches::stage())
     .mount(
       "/v1",
       routes![
@@ -74,4 +39,15 @@ fn rocket() -> _ {
         config::get_config,
       ],
     )
+}
+
+#[cfg(test)]
+mod test {
+  use rocket::local::asynchronous::Client;
+
+  #[rocket::async_test]
+  async fn test_create_server() {
+    let client = Client::tracked(crate::rocket()).await;
+    assert_eq!(client.is_ok(), true);
+  }
 }

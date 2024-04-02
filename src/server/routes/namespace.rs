@@ -1,8 +1,7 @@
-use std::collections::HashSet;
-
 use crate::catalog::namespace::{Namespace, NamespaceIdent};
 use crate::common::result::{self, EmptyResult, ErrorType, JsonResult, Location, Result};
 use crate::{err, ok_empty, ok_json};
+use std::collections::HashSet;
 
 use rocket::request::FromParam;
 
@@ -67,9 +66,13 @@ pub struct UpdateNamespaceRequest {
 
 /// List namespaces, optionally providing a parent namespace to list underneath
 #[get("/namespaces?<parent..>")]
-pub async fn get(parent: &str, db: &State<DB>) -> JsonResult {
+pub async fn get(parent: Option<&str>, db: &State<DB>) -> JsonResult {
   let conn = db.get_read_conn()?;
-  let parent = NamespaceParam::try_from(parent)?.0;
+  let parent = if let Some(p_str) = parent {
+    NamespaceParam::try_from(p_str)?.0
+  } else {
+    vec![]
+  };
   let res = Namespace::list(&conn, &parent);
   match res {
     None => err!(
@@ -172,7 +175,7 @@ pub fn post_properties(
 }
 
 pub fn stage() -> rocket::fairing::AdHoc {
-  rocket::fairing::AdHoc::on_ignite("namespace", |rocket| async {
+  rocket::fairing::AdHoc::on_ignite("namespace routes", |rocket| async {
     rocket
       .mount(
         "/v1/namespaces",
