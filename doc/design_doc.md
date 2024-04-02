@@ -8,22 +8,21 @@
 ### Goal
 The goal of this project is to design and implement a **Catalog Service** for an OLAP database system. The Catalog aims for managing metadata and providing a centralized repository for storing information about the structure and organization of data within the OLAP database. This project aims to produce a functional catalog that adheres to [the Iceberg catalog specification](https://iceberg.apache.org/spec/) exposed through [REST API](https://github.com/apache/iceberg/blob/main/open-api/rest-catalog-open-api.yaml).
 ## Architectural Design
-We follow the logic model described below. The input of our service comes from execution engine and I/O service. And we will provide metadata to planner and scheduler.
+We follow the logic model described below. The input of our service comes from execution engine and I/O service. And we will provide metadata to planner and scheduler. We will use [pickleDB](https://docs.rs/pickledb/latest/pickledb/) as the key-value store to store (namespace, tables) and (table_name, metadata) as two (key, value) pairs as local db files.
+We will use [Rocket](https://rocket.rs) as the web framework handling incoming API traffic.
 ![system architecture](./assets/system-architecture.png)
 ### Data Model
-We adhere to the Iceberg data model, arranging tables based on namespaces, with each table uniquely identified by its name. <strike>Our goal is to enable multi-versioning, facilitating point-in-time queries and allowing for queries at a specific historical version of the table.</strike>
-
-For every table in the catalog, there is an associated metadata file. This file contains a collection of manifests, each of which references the table's information at different points in time. The manifest file is an in-memory, non-persistent component that gets recreated based on on-disk files during service restarts. (If it is not frequently updated, we could dump it to disk every time we update it)
-
-To enhance startup and recovery times, we periodically save the in-memory index to disk. This ensures a quicker restoration process by utilizing the dumped index data.
-![Catalog Data Model](./assets/iceberg-metadata.png)
+We adhere to the Iceberg data model, arranging tables based on namespaces, with each table uniquely identified by its name.
+For every namespace in the database, there are associated list of tables.
+For every table in the catalog, there are associated metadata, including statistics, version, table-uuid, location, last-column-id, schema, and partition-spec.
+The parameters for request and response can be referenced from [REST API](https://github.com/apache/iceberg/blob/main/open-api/rest-catalog-open-api.yaml). We directly import Iceberg-Rust as a starting point.
 
 ### Use Cases
 #### Namespace
-create/update/delete namespace. 
+create/delete/rename namespace
 #### Table
-create/update/delete table 
-#### Query Table’s Metadata
+create/delete/rename table 
+#### Query Table’s Metadata (including statistics, version, table-uuid, location, last-column-id, schema, and partition-spec)
 get metadeta by {namespace}/{table}
 
 ## Design Rationale
@@ -32,11 +31,10 @@ get metadeta by {namespace}/{table}
   * Data durability mechanisms will be implemented to prevent data loss during restarts.
 * Performance:
   * Optimization on data retrieval and storage strategies to minimize latency in metadata access.
-  * Efficient indexing mechanisms, such as Bloom filters, enhance query performance.
-  * Partitioning strategies facilitate data pruning and improve query execution performance.
 * Engineering Complexity / Maintainability:
   * Centralized metadata management achieved by separating data and metadata, reducing complexity and facilitating consistent metadata handling.
   * Code modularity and clear interfaces facilitate easier updates and improvements.
+  * We adopt the existing kvstore ([pickleDB](https://docs.rs/pickledb/latest/pickledb/)) and server ([Rocket](https://github.com/rwf2/Rocket)) to mitigate the engineering complexity.
 * Testing:
   * Comprehensive testing plans cover correctness through unit tests and performance through long-running regression tests. Unit tests focus on individual components of the catalog service, while regression tests evaluate system-wide performance and stability.
 * Other Implementations:
