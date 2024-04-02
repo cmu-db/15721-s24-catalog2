@@ -209,7 +209,7 @@ pub fn rename_table(rename_table_request: Json<RenameTableRequest>, db: &State<D
     namespace_hash,
     rename_table_request.source.name.clone(),
     rename_table_request.destination.name.clone(),
-  );
+  )?;
   ok_empty!()
 
   // let error = false;

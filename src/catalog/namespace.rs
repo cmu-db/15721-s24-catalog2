@@ -41,6 +41,7 @@ impl Namespace {
         let namespace = Namespace {
           child: vec![],
           properties: properties,
+          tables: vec![],
         };
         conn.put(key, &namespace)?;
         Ok(())

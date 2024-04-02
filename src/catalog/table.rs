@@ -109,16 +109,16 @@ impl Table {
     namespace_name: String,
     old_table_name: String,
     new_table_name: String,
-  ) -> bool {
+  ) -> Result<bool> {
     let old_table_key = format!("{}_{}", namespace_name.clone(), old_table_name.clone());
     let new_table_key = format!("{}_{}", namespace_name.clone(), new_table_name.clone());
 
     if let Some(mut old_table) = conn.get::<Table>(&old_table_key) {
       old_table.name = new_table_name.clone();
-      conn.put(&new_table_key, &old_table);
-      conn.delete(&old_table_key); // Remove the old key
+      conn.put(&new_table_key, &old_table)?;
+      conn.delete(&old_table_key)?; // Remove the old key
     } else {
-      return false; // If the old table does not exist, return false or handle it accordingly
+      return Ok(false); // If the old table does not exist, return false or handle it accordingly
     }
 
     // true
@@ -131,13 +131,13 @@ impl Table {
         .position(|name| name == &old_table_name)
       {
         namespace.tables[index] = new_table_name.clone();
-        conn.put(&namespace_key, &namespace);
-        true
+        conn.put(&namespace_key, &namespace)?;
+        Ok(true)
       } else {
-        return false; // If the old table name is not found in the tables vector, return false or handle it accordingly
+        return Ok(false); // If the old table name is not found in the tables vector, return false or handle it accordingly
       }
     } else {
-      return false; // If the namespace does not exist, return false or handle it accordingly
+      return Ok(false); // If the namespace does not exist, return false or handle it accordingly
     }
   }
 }
