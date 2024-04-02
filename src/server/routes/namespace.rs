@@ -1,12 +1,14 @@
+use std::collections::HashSet;
+
 use crate::catalog::namespace::{Namespace, NamespaceIdent};
 use crate::common::result::{self, EmptyResult, ErrorType, JsonResult, Location, Result};
-use crate::err;
+use crate::{err, ok_empty, ok_json};
 
 use rocket::request::FromParam;
 
 use rocket::{
   serde::{
-    json::{json, Json, Value},
+    json::{Json, Value},
     Deserialize,
   },
   State,
@@ -55,6 +57,14 @@ pub struct CreateNamespaceRequest {
   properties: Option<Value>,
 }
 
+#[derive(Deserialize)]
+#[serde(crate = "rocket::serde")]
+// Update Namespace Request
+pub struct UpdateNamespaceRequest {
+  pub removals: Option<Vec<String>>,
+  pub updates: Option<Value>,
+}
+
 /// List namespaces, optionally providing a parent namespace to list underneath
 #[get("/namespaces?<parent..>")]
 pub async fn get(parent: &str, db: &State<DB>) -> JsonResult {
@@ -67,7 +77,7 @@ pub async fn get(parent: &str, db: &State<DB>) -> JsonResult {
       Location::Namespace,
       format!("Namespace {} not found", parent.join("."))
     ),
-    Some(v) => Ok(Json(json!( { "namespaces": v }))),
+    Some(v) => ok_json!( { "namespaces": v }),
   }
 }
 
@@ -80,10 +90,10 @@ pub async fn post(create_request: Json<CreateNamespaceRequest>, db: &State<DB>) 
     &create_request.namespace,
     create_request.properties.clone(), // FIXME: this is a clone, can it be avoided?
   )?;
-  Ok(Json(json!({
+  ok_json!({
     "namespace": create_request.namespace.clone(),
     "properties": created_namespace.properties,
-  })))
+  })
 }
 
 /// Check if a namespace exists
@@ -92,7 +102,7 @@ pub async fn head_by_name(namespace: NamespaceParam, db: &State<DB>) -> EmptyRes
   let conn = db.get_read_conn()?;
   let exists = Namespace::exists(&conn, &namespace.0);
   match exists {
-    true => Ok(()),
+    true => ok_empty!(),
     false => err!(
       ErrorType::NotFound,
       Location::Namespace,
@@ -106,19 +116,59 @@ pub async fn head_by_name(namespace: NamespaceParam, db: &State<DB>) -> EmptyRes
 pub async fn get_by_name(namespace: NamespaceParam, db: &State<DB>) -> JsonResult {
   let conn = db.get_read_conn()?;
   let properties = Namespace::get_properties(&conn, &namespace.0)?;
-  Ok(Json(json!({ "properties": properties })))
+  ok_json!({ "properties": properties })
 }
 
 /// Drop a namespace from the catalog. Namespace must be empty.
 #[delete("/<namespace>")]
-pub fn delete_by_name(namespace: NamespaceParam, db: &State<DB>) {
-  todo!("delete_namespace_by_name")
+pub async fn delete_by_name(namespace: NamespaceParam, db: &State<DB>) -> EmptyResult {
+  let mut conn = db.get_write_conn()?;
+  Namespace::delete(&mut conn, &namespace.0)?;
+  ok_empty!()
 }
 
 /// Set or remove properties on a namespace
-#[post("/<namespace>/properties")]
-pub fn post_properties(namespace: NamespaceParam, db: &State<DB>) {
-  todo!("post_namespace_properties")
+#[post("/<namespace>/properties", data = "<update_request>")]
+pub fn post_properties(
+  namespace: NamespaceParam,
+  mut update_request: Json<UpdateNamespaceRequest>,
+  db: &State<DB>,
+) -> JsonResult {
+  // we don't test the uniqueness of the keys in removals, it will be treated as a no-op.
+  // we only test if a key is presented both in the removals and update.
+  if update_request.updates.is_none() && update_request.removals.is_none() {
+    return err!(
+      ErrorType::BadRequest,
+      Location::Request,
+      "No updates or removals provided".to_owned()
+    );
+  }
+  if let (Some(removals), Some(updates)) = (&update_request.removals, &update_request.updates) {
+    let mut removed_key: HashSet<&str> = HashSet::new();
+    for key in removals {
+      removed_key.insert(key);
+    }
+    if let Some(updates) = updates.as_object() {
+      for key in updates.keys() {
+        if removed_key.contains(key.as_str()) {
+          return err!(
+            ErrorType::BadRequest,
+            Location::Namespace,
+            format!("Key {} is present in both removals and updates", key)
+          );
+        }
+      }
+    }
+  }
+
+  let mut conn = db.get_write_conn()?;
+  let res = Namespace::update(
+    &mut conn,
+    &namespace.0,
+    update_request.removals.take(),
+    update_request.updates.take(),
+  )?;
+  ok_json!(res)
 }
 
 pub fn stage() -> rocket::fairing::AdHoc {

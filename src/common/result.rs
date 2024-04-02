@@ -37,10 +37,18 @@ pub struct Error {
   pub message: String,
 }
 
+pub struct Empty {}
+
 // alias for Result with the error type.
 pub type Result<T> = result::Result<T, Error>;
 pub type JsonResult = Result<Json<Value>>;
-pub type EmptyResult = Result<()>;
+pub type EmptyResult = Result<Empty>;
+
+impl From<()> for Empty {
+  fn from(_: ()) -> Empty {
+    Empty {}
+  }
+}
 
 impl fmt::Display for Location {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

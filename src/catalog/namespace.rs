@@ -5,7 +5,10 @@ use crate::{
   err,
   util::time,
 };
-use rocket::serde::{Deserialize, Serialize};
+use rocket::{
+  form::validate::len,
+  serde::{Deserialize, Serialize},
+};
 use serde_json::{json, Value};
 
 use crate::db::DBConnection;
@@ -109,9 +112,9 @@ impl Namespace {
   }
 
   // get will return an error if the namespace does not exist
-  pub fn delete(conn: &DBConnection, level: &Vec<NamespaceIdent>) -> Result<Option<Value>> {
+  pub fn delete(conn: &mut DBConnection, level: &Vec<NamespaceIdent>) -> Result<()> {
     let key = hash(level);
-    let namespace: Option<Namespace> = conn.get(key.as_str());
+    let namespace: Option<Namespace> = conn.get(&key);
     if namespace.is_none() {
       return err!(
         ErrorType::NotFound,
@@ -119,6 +122,59 @@ impl Namespace {
         format!("Namespace {} not found", key)
       );
     }
-    Ok(Some(namespace.unwrap().properties))
+    let namespace = namespace.unwrap();
+    if !namespace.child.is_empty() {
+      return err!(
+        ErrorType::BadRequest,
+        Location::Namespace,
+        format!("Namespace {} has children", key)
+      );
+    }
+    conn.delete(&key)
+  }
+
+  pub fn update(
+    conn: &mut DBConnection,
+    level: &Vec<NamespaceIdent>,
+    removals: Option<Vec<String>>,
+    updates: Option<Value>,
+  ) -> Result<Value> {
+    let key = hash(level);
+    let namespace: Option<Namespace> = conn.get(&key);
+    if namespace.is_none() {
+      return err!(
+        ErrorType::NotFound,
+        Location::Namespace,
+        format!("Namespace {} not found", key)
+      );
+    }
+    let mut namespace = namespace.unwrap();
+    let properties = namespace.properties.as_object_mut().unwrap();
+
+    let mut removed_keys = vec![];
+    let mut missing_keys = vec![];
+    if let Some(removals) = removals {
+      for key in removals {
+        if let Some(_) = properties.remove(&key) {
+          removed_keys.push(key);
+        } else {
+          missing_keys.push(key);
+        }
+      }
+    }
+
+    let mut updated_keys: Vec<String> = vec![];
+    if let Some(updates) = updates {
+      for (key, value) in updates.as_object().unwrap() {
+        properties.insert(key.to_string(), value.to_owned());
+        updated_keys.push(key.to_string());
+      }
+    }
+
+    Ok(json!({
+      "removed_keys": removed_keys,
+      "missing_keys": missing_keys,
+      "updated_keys": updated_keys,
+    }))
   }
 }
