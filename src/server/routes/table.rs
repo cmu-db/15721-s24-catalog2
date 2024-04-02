@@ -11,6 +11,9 @@ use crate::common::result::{EmptyResult, ErrorType, Location, Result};
 use crate::catalog::table::Table;
 use crate::catalog::namespace::Namespace;
 
+use crate::DB;
+use rocket::State;
+
 pub type JsonResultGeneric<T> = Result<Json<T>>;
 
 
