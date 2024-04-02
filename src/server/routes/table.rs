@@ -6,7 +6,7 @@ use crate::request::*;
 use crate::server::routes::common::*;
 
 use crate::common::result::{self, EmptyResult, ErrorType, JsonResult, Location, Result};
-use crate::err;
+use crate::{err, ok_empty, ok_json};
 // use rocket::serde::json::Json;
 // use rocket::Error;
 
@@ -54,6 +54,8 @@ pub fn get_table_by_namespace(namespace: &str) -> JsonResultGeneric<ListTablesRe
 /// Create a table in the given namespace
 #[post("/namespaces/<namespace>/tables", data = "<create_table_request>")]
 pub fn post_table_by_namespace(namespace: &str, create_table_request: Json<CreateTableRequest>, db: &State<DB>) -> JsonResultGeneric<CreateTableResponse> {
+  
+  
   // Generate metadata for the newly created table
   let metadata = TableMetadata {
     format_version: 1,
@@ -169,7 +171,8 @@ pub fn delete_table(namespace: &str, table: &str, purge_requested: PurgeRequeste
   // }
   let error = false;
   match !error {
-    true => Ok(()),
+    // true => Ok(()),
+    true => ok_empty!(),
     false => err!(
       ErrorType::NotFound,
       Location::Table,
@@ -200,7 +203,8 @@ pub fn head_table(namespace: &str, table: &str) -> EmptyResult {
   // }
   let error = false;
   match !error {
-    true => Ok(()),
+    // true => Ok(()),
+    true => ok_empty!(),
     false => err!(
       ErrorType::NotFound,
       Location::Table,
@@ -234,7 +238,8 @@ pub fn rename_table(rename_table_request: Json<RenameTableRequest>) -> EmptyResu
   // }
   let error = false;
   match !error {
-    true => Ok(()),
+    // true => Ok(()),
+    true => ok_empty!(),
     false => err!(
       ErrorType::NotFound,
       Location::Table,

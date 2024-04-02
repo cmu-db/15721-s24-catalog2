@@ -7,7 +7,7 @@ use crate::server::routes::common::*;
 pub struct CreateTableRequest {
     name: String,
     // location: Option<String>,
-    schema: Schema,
+    // schema: Schema,
     // #[serde(rename = "partition-spec")]
     // partition_spec: PartitionSpec,
     // #[serde(rename = "write-order")]
