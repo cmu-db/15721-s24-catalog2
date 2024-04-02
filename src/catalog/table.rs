@@ -116,14 +116,6 @@ impl Table {
         // TODO: probably want to know whether it is namespace not found or table not found
     }
 
-    // pub fn commit(conn: &DBConnection, namespace_name: String, table_name: String) -> Option<Table> {
-    //     let table_key = format!("{}_{}", namespace_name, table_name);
-        
-
-    //     // TODO: probably want to know whether it is namespace not found or table not found
-    // }
-
-
     pub fn rename(conn: &mut DBConnection, namespace_name: String, old_table_name: String, new_table_name: String) -> bool {
         let old_table_key = format!("{}_{}", namespace_name.clone(), old_table_name.clone());
         let new_table_key = format!("{}_{}", namespace_name.clone(), new_table_name.clone());

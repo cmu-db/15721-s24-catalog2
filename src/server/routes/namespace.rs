@@ -16,7 +16,7 @@ use rocket::{
 
 use crate::db::DB;
 
-pub struct NamespaceParam(Vec<NamespaceIdent>);
+pub struct NamespaceParam(pub Vec<NamespaceIdent>);
 
 /// Returns an instance of `PasteId` if the path segment is a valid ID.
 /// Otherwise returns the invalid ID as the `Err` value.

@@ -6,10 +6,9 @@ use rocket::response::{content, status};
 use rocket::serde::json::Json;
 
 use crate::common::result::{EmptyResult, ErrorType, Location, Result};
-// use rocket::serde::json::Json;
-// use rocket::Error;
 use crate::catalog::table::Table;
 use crate::catalog::namespace::Namespace;
+use crate::server::routes::namespace::NamespaceParam;
 
 use crate::DB;
 use rocket::State;
@@ -25,28 +24,22 @@ fn hash<'a>(level: &Vec<String>) -> String {
   }
 }
 
-fn unhash(hashed: &str) -> Vec<String> {
-  if hashed == "root" {
-      Vec::new()
-  } else {
-      hashed.split("::").map(String::from).collect()
-  }
-}
-
 /// List all table identifiers underneath a given namespace
 #[get("/namespaces/<namespace>/tables")]
-pub fn get_table_by_namespace(namespace: &str, db: &State<DB>) -> JsonResultGeneric<ListTablesResponse> {
+pub fn get_table_by_namespace(namespace: NamespaceParam, db: &State<DB>) -> JsonResultGeneric<ListTablesResponse> {
   let mut conn = db.get_read_conn()?;
+  let copy = namespace.0.clone();
+  let hash_key = hash(&namespace.0);
   let table_names = Table::list(
     &mut conn,
-    namespace.to_string(), 
+    hash_key.to_string(), 
   );
   let all_table_names = table_names.clone();
   
   let mut identifiers = Vec::new();
   for table_name in all_table_names.into_iter().flatten() {
       let identifier = TableIdentifier {
-          namespace: NamespaceResponse(vec![namespace.to_string()], ), // Assuming namespace is a Vec<String>
+          namespace: NamespaceResponse(copy.clone() ), // Assuming namespace is a Vec<String>
           name: table_name.clone(),
       };
       identifiers.push(identifier);
