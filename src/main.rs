@@ -32,6 +32,15 @@ fn general_bad_request() -> EmptyResult {
   )
 }
 
+#[catch(422)]
+fn general_unprocessable_request() -> EmptyResult {
+  err!(
+    ErrorType::Unprocessable,
+    Location::Request,
+    "Unprocessable request".to_string()
+  )
+}
+
 #[catch(500)]
 fn general_internal_error() -> EmptyResult {
   err!(
@@ -56,7 +65,8 @@ fn rocket() -> _ {
       catchers![
         general_not_found,
         general_bad_request,
-        general_internal_error
+        general_internal_error,
+        general_unprocessable_request
       ],
     )
     .mount(

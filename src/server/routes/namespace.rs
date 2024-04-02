@@ -67,9 +67,13 @@ pub struct UpdateNamespaceRequest {
 
 /// List namespaces, optionally providing a parent namespace to list underneath
 #[get("/namespaces?<parent..>")]
-pub async fn get(parent: &str, db: &State<DB>) -> JsonResult {
+pub async fn get(parent: Option<&str>, db: &State<DB>) -> JsonResult {
   let conn = db.get_read_conn()?;
-  let parent = NamespaceParam::try_from(parent)?.0;
+  let parent = if let Some(p_str) = parent {
+    NamespaceParam::try_from(p_str)?.0
+  } else {
+    vec![]
+  };
   let res = Namespace::list(&conn, &parent);
   match res {
     None => err!(
@@ -186,4 +190,21 @@ pub fn stage() -> rocket::fairing::AdHoc {
       )
       .mount("/v1", routes![get]) // for a query parameter
   })
+}
+
+#[cfg(test)]
+mod test {
+
+  use rocket::{http::Status, local::asynchronous::Client};
+
+  #[rocket::async_test]
+  async fn test_namespace() {
+    let client = Client::tracked(crate::rocket())
+      .await
+      .expect("valid rocket instance");
+
+    let response = client.get("/v1/namespaces").dispatch().await;
+    println!("{:?}", response);
+    assert_eq!(response.status(), Status::Ok);
+  }
 }

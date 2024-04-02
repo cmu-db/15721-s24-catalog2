@@ -68,7 +68,6 @@ impl Namespace {
     )
   }
 
-  // exist will not return an error
   pub fn create(
     conn: &mut DBConnection,
     level: &Vec<NamespaceIdent>,
