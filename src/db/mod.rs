@@ -67,6 +67,17 @@ impl DBConnection {
     }
   }
 
+  pub fn delete(&mut self, key: &str) -> Result<()> {
+    match self.0.rem(key) {
+      Ok(_) => Ok(()),
+      Err(e) => Err(Error {
+        error_type: ErrorType::InternalError,
+        location: Location::DB,
+        message: format!("Failed to delete key: {}, error: {}", key, e),
+      }),
+    }
+  }
+
   fn new() -> Result<DBConnection> {
     // Load the database from disk, if no database exists, create a new one.
     match PickleDb::load(

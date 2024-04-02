@@ -1,6 +1,6 @@
 use std::io::Cursor;
 
-use crate::common::result::{Error, ErrorType};
+use crate::common::result::{Empty, Error, ErrorType};
 use rocket::{
   http::{ContentType, Status},
   response::{self, Responder},
@@ -41,6 +41,14 @@ impl<'r> Responder<'r, 'static> for Error {
   }
 }
 
+// HTTP response builder for Empty response 204
+impl<'r> Responder<'r, 'static> for Empty {
+  fn respond_to(self, _: &'r Request<'_>) -> response::Result<'static> {
+    // Build and send the request.
+    Response::build().status(Status::NoContent).ok()
+  }
+}
+
 #[macro_export]
 macro_rules! err {
   ($error_type:expr, $location:expr, $message:expr) => {
@@ -49,5 +57,21 @@ macro_rules! err {
       location: $location,
       message: $message,
     })
+  };
+}
+
+#[macro_export]
+macro_rules! ok_json {
+    ($($json:tt)+) => {Ok(
+      rocket::serde::json::Json(
+        rocket::serde::json::serde_json::json!($($json)*)
+      )
+    )};
+}
+
+#[macro_export]
+macro_rules! ok_empty {
+  () => {
+    Ok(crate::common::result::Empty {})
   };
 }
