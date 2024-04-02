@@ -1,6 +1,6 @@
 use rocket::http::Status;
 use rocket::response::{content, status};
-use rocket::serde::json::Json;
+// use rocket::serde::json::Json;
 use crate::response::*;
 use crate::request::*;
 use crate::server::routes::common::*;
@@ -12,6 +12,15 @@ use crate::err;
 
 
 pub type JsonResultGeneric<T> = Result<Json<T>>;
+use rocket::{
+  serde::{
+    json::{json, Json, Value},
+    Deserialize,
+  },
+  State,
+};
+
+use crate::db::DB;
 
 /// List all table identifiers underneath a given namespace
 #[get("/namespaces/<namespace>/tables")]
@@ -44,7 +53,7 @@ pub fn get_table_by_namespace(namespace: &str) -> JsonResultGeneric<ListTablesRe
 
 /// Create a table in the given namespace
 #[post("/namespaces/<namespace>/tables", data = "<create_table_request>")]
-pub fn post_table_by_namespace(namespace: &str, create_table_request: Json<CreateTableRequest>) -> JsonResultGeneric<CreateTableResponse> {
+pub fn post_table_by_namespace(namespace: &str, create_table_request: Json<CreateTableRequest>, db: &State<DB>) -> JsonResultGeneric<CreateTableResponse> {
   // Generate metadata for the newly created table
   let metadata = TableMetadata {
     format_version: 1,

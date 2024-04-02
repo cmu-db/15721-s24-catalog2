@@ -1,4 +1,5 @@
 pub mod namespace;
+pub mod table;
 
 struct Catalog {}
 

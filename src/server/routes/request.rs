@@ -6,8 +6,8 @@ use crate::server::routes::common::*;
 // #[derive(serde::Deserialize)]
 pub struct CreateTableRequest {
     name: String,
-    location: Option<String>,
-    // schema: Schema,
+    // location: Option<String>,
+    schema: Schema,
     // #[serde(rename = "partition-spec")]
     // partition_spec: PartitionSpec,
     // #[serde(rename = "write-order")]
