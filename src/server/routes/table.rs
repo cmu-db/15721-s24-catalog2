@@ -1,26 +1,15 @@
-use rocket::http::Status;
-use rocket::response::{content, status};
-// use rocket::serde::json::Json;
-use crate::response::*;
 use crate::request::*;
+use crate::response::*;
 use crate::server::routes::common::*;
 
-use crate::common::result::{self, EmptyResult, ErrorType, JsonResult, Location, Result};
-use crate::{err, ok_empty, ok_json};
+use crate::common::result::{EmptyResult, ErrorType, Location, Result};
+use crate::{err, ok_empty};
 // use rocket::serde::json::Json;
 // use rocket::Error;
-
+use crate::db::DB;
 
 pub type JsonResultGeneric<T> = Result<Json<T>>;
-use rocket::{
-  serde::{
-    json::{json, Json, Value},
-    Deserialize,
-  },
-  State,
-};
-
-use crate::db::DB;
+use rocket::serde::json::Json;
 
 /// List all table identifiers underneath a given namespace
 #[get("/namespaces/<namespace>/tables")]
@@ -53,9 +42,10 @@ pub fn get_table_by_namespace(namespace: &str) -> JsonResultGeneric<ListTablesRe
 
 /// Create a table in the given namespace
 #[post("/namespaces/<namespace>/tables", data = "<create_table_request>")]
-pub fn post_table_by_namespace(namespace: &str, create_table_request: Json<CreateTableRequest>, db: &State<DB>) -> JsonResultGeneric<CreateTableResponse> {
-  
-  
+pub fn post_table_by_namespace(
+  namespace: &str,
+  create_table_request: Json<CreateTableRequest>,
+) -> JsonResultGeneric<CreateTableResponse> {
   // Generate metadata for the newly created table
   let metadata = TableMetadata {
     format_version: 1,
@@ -72,7 +62,10 @@ pub fn post_table_by_namespace(namespace: &str, create_table_request: Json<Creat
 
 /// Register a table in the given namespace using given metadata file location
 #[post("/namespaces/<namespace>/register", data = "<register_table_request>")]
-pub fn register_table(namespace: &str, register_table_request: Json<RegisterTableRequest>) -> JsonResultGeneric<LoadTableResponse> {
+pub fn register_table(
+  namespace: &str,
+  register_table_request: Json<RegisterTableRequest>,
+) -> JsonResultGeneric<LoadTableResponse> {
   // Generate metadata for the newly created table
   let metadata = TableMetadata {
     format_version: 1,
@@ -105,8 +98,15 @@ pub fn get_table(namespace: &str, table: &str) -> JsonResultGeneric<LoadTableRes
 }
 
 /// Commit updates to a table
-#[post("/namespaces/<namespace>/tables/<table>", data = "<commit_table_request>")]
-pub fn post_table(namespace: &str, table: &str, commit_table_request: Json<CommitTableRequest>) -> JsonResultGeneric<CommitTableResponse> {
+#[post(
+  "/namespaces/<namespace>/tables/<table>",
+  data = "<commit_table_request>"
+)]
+pub fn post_table(
+  namespace: &str,
+  table: &str,
+  commit_table_request: Json<CommitTableRequest>,
+) -> JsonResultGeneric<CommitTableResponse> {
   // let bad_request = namespace.is_empty() || table.is_empty();
   // // let bad_request = true;
   // let post_success = false;
@@ -114,7 +114,7 @@ pub fn post_table(namespace: &str, table: &str, commit_table_request: Json<Commi
   // let table_exist_already = false;
 
   // if bad_request{
-  //   status::Custom(Status::BadRequest, content::RawJson("{ \"Error 400 BadRequest\": \"Namespace or table name empty\" }")) 
+  //   status::Custom(Status::BadRequest, content::RawJson("{ \"Error 400 BadRequest\": \"Namespace or table name empty\" }"))
   // } else {
   //   if post_success{
   //     status::Custom(Status::Ok, content::RawJson("")) // successful request 200
@@ -142,7 +142,7 @@ pub fn post_table(namespace: &str, table: &str, commit_table_request: Json<Commi
   let response = CommitTableResponse {
     metadata,
     metadata_location: "".to_string(),
-   };
+  };
 
   // Return the response as JSON
   Ok(Json(response))
@@ -157,7 +157,7 @@ pub fn delete_table(namespace: &str, table: &str, purge_requested: PurgeRequeste
   // let table_found = false;
 
   // if bad_request{
-  //   status::Custom(Status::BadRequest, content::RawJson("{ \"Error 400 BadRequest\": \"Namespace or table name empty\" }")) 
+  //   status::Custom(Status::BadRequest, content::RawJson("{ \"Error 400 BadRequest\": \"Namespace or table name empty\" }"))
   // } else {
   //   if delete_success{
   //     status::Custom(Status::NoContent, content::RawJson("")) // 204 successful request
@@ -171,7 +171,6 @@ pub fn delete_table(namespace: &str, table: &str, purge_requested: PurgeRequeste
   // }
   let error = false;
   match !error {
-    // true => Ok(()),
     true => ok_empty!(),
     false => err!(
       ErrorType::NotFound,
@@ -189,7 +188,7 @@ pub fn head_table(namespace: &str, table: &str) -> EmptyResult {
   // let error_occur = true;
 
   // if bad_request{
-  //   status::Custom(Status::BadRequest, content::RawJson("{ \"Error 400 BadRequest\": \"Namespace or table name empty\" }")) 
+  //   status::Custom(Status::BadRequest, content::RawJson("{ \"Error 400 BadRequest\": \"Namespace or table name empty\" }"))
   // } else {
   //   if !error_occur{
   //     if table_found{
@@ -203,7 +202,6 @@ pub fn head_table(namespace: &str, table: &str) -> EmptyResult {
   // }
   let error = false;
   match !error {
-    // true => Ok(()),
     true => ok_empty!(),
     false => err!(
       ErrorType::NotFound,
@@ -238,7 +236,6 @@ pub fn rename_table(rename_table_request: Json<RenameTableRequest>) -> EmptyResu
   // }
   let error = false;
   match !error {
-    // true => Ok(()),
     true => ok_empty!(),
     false => err!(
       ErrorType::NotFound,
