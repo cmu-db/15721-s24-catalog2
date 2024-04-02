@@ -1,20 +1,20 @@
-use rocket::serde::Deserialize;
 use crate::server::routes::common::*;
+use rocket::serde::Deserialize;
 
 #[derive(Deserialize)]
 #[serde(crate = "rocket::serde")]
 // #[derive(serde::Deserialize)]
 pub struct CreateTableRequest {
-    name: String,
-    // location: Option<String>,
-    // schema: Schema,
-    // #[serde(rename = "partition-spec")]
-    // partition_spec: PartitionSpec,
-    // #[serde(rename = "write-order")]
-    // write_order: SortOrder,
-    // #[serde(rename = "stage-create")]
-    // stage_create: bool,
-    // properties: Option<HashMap<String, String>>,
+  name: String,
+  // location: Option<String>,
+  // schema: Schema,
+  // #[serde(rename = "partition-spec")]
+  // partition_spec: PartitionSpec,
+  // #[serde(rename = "write-order")]
+  // write_order: SortOrder,
+  // #[serde(rename = "stage-create")]
+  // stage_create: bool,
+  // properties: Option<HashMap<String, String>>,
 }
 
 #[derive(Deserialize)]
@@ -28,31 +28,31 @@ pub struct RegisterTableRequest {
 #[derive(Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct CommitTableRequest {
-    // pub identifier: TableIdentifier,
-    pub requirements: Vec<TableRequirement>,
-    pub updates: Vec<TableUpdate>,
+  // pub identifier: TableIdentifier,
+  pub requirements: Vec<TableRequirement>,
+  pub updates: Vec<TableUpdate>,
 }
 
 #[derive(Deserialize)]
 #[serde(crate = "rocket::serde")]
 #[serde(rename_all = "camelCase")]
 pub struct TableRequirement {
-    #[serde(flatten)]
-    pub requirement: RequirementType,
+  #[serde(flatten)]
+  pub requirement: RequirementType,
 }
 
 #[derive(Deserialize)]
 #[serde(crate = "rocket::serde")]
 #[serde(untagged)]
 pub enum RequirementType {
-    // AssertCreate(AssertCreate),
-    // AssertTableUUID(AssertTableUUID),
-    // AssertRefSnapshotId(AssertRefSnapshotId),
-    // AssertLastAssignedFieldId(AssertLastAssignedFieldId),
-    // AssertCurrentSchemaId(AssertCurrentSchemaId),
-    // AssertLastAssignedPartitionId(AssertLastAssignedPartitionId),
-    // AssertDefaultSpecId(AssertDefaultSpecId),
-    // AssertDefaultSortOrderId(AssertDefaultSortOrderId),
+  // AssertCreate(AssertCreate),
+  // AssertTableUUID(AssertTableUUID),
+  // AssertRefSnapshotId(AssertRefSnapshotId),
+  // AssertLastAssignedFieldId(AssertLastAssignedFieldId),
+  // AssertCurrentSchemaId(AssertCurrentSchemaId),
+  // AssertLastAssignedPartitionId(AssertLastAssignedPartitionId),
+  // AssertDefaultSpecId(AssertDefaultSpecId),
+  // AssertDefaultSortOrderId(AssertDefaultSortOrderId),
 }
 
 #[derive(Deserialize)]
@@ -78,13 +78,12 @@ pub enum TableUpdate {
 
 #[derive(FromForm)]
 pub struct PurgeRequested {
-    purge_requested: Option<bool>,
+  purge_requested: Option<bool>,
 }
-
 
 #[derive(Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct RenameTableRequest {
-    pub source: TableIdentifier,
-    pub destination: TableIdentifier,
+  pub source: TableIdentifier,
+  pub destination: TableIdentifier,
 }
