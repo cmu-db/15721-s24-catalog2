@@ -1,15 +1,15 @@
 use crate::request::*;
-use crate::response::*;
 use crate::server::routes::common::*;
+use crate::{err, ok_empty, response::*};
+use rocket::http::Status;
+use rocket::response::{content, status};
+use rocket::serde::json::Json;
 
 use crate::common::result::{EmptyResult, ErrorType, Location, Result};
-use crate::{err, ok_empty};
 // use rocket::serde::json::Json;
 // use rocket::Error;
-use crate::db::DB;
 
 pub type JsonResultGeneric<T> = Result<Json<T>>;
-use rocket::serde::json::Json;
 
 /// List all table identifiers underneath a given namespace
 #[get("/namespaces/<namespace>/tables")]
