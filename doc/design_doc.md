@@ -19,9 +19,9 @@ The parameters for request and response can be referenced from [REST API](https:
 
 ### Use Cases
 #### Namespace
-create/delete/rename namespace
+create/delete/rename/list namespace
 #### Table
-create/delete/rename table 
+create/delete/rename/list table 
 #### Query Table’s Metadata (including statistics, version, table-uuid, location, last-column-id, schema, and partition-spec)
 get metadeta by {namespace}/{table}
 
@@ -46,10 +46,12 @@ To ensure the quality and the performance of the catalog implemented, a comprehe
 * Functional testing
   * API tests: For functional testing, we can achieve the goal through unit tests. We will test each API endpoint implemented in our project to ensure correct behavior. We will test various input parameters and validate the response format and the status code are as expected. Also, we will try to mimic possible edge cases and errors to ensure the implementation is robust and can perform suitable error handling. By doing so, we can ensure the API works as expected and provides correct results to clients. 
   * Metadata tests: We will focus on verifying the correct storage and retrieval of metadata. Tests will include different scenarios, including some edge cases. [Quickcheck](https://github.com/BurntSushi/quickcheck) is an example for performing the testing.
-  * [Documentation tests](https://doc.rust-lang.org/rustdoc/write-documentation/documentation-tests.html#documentation-tests): Execute document examples 
-* Non-functional testing
-  * Microbenchmarking for performance evaluation: We can use [Criterion.rs](https://github.com/bheisler/criterion.rs?tab=readme-ov-file#features) and [bencher](https://github.com/bluss/bencher) to collect statistics to enable statistics-driven optimizations. In addition, we can set up a performance baseline to compare the performance with our implementation. We can measure different metrics, for example, response time, throughput, etc.  
-  * Scalability test: We will try to test our implementation under increased load and ensure the correctness and efficiency at the same time.
+* Benchmark testing
+  * Key performance metrics: Latency and Request Per Second (RPS) would be used as key metrics.
+  * Workload: Since we are working on an OLAP database, the workload expected should be read-heavy. We thus expect read-heavy and write-occasional workloads that include complex joins and predicates, analytical queries, periodic updates on catalog data, and some metadata updates. Based on this assumption, we plan to evaluate 3 different read-to-write ratios: 1000:1, 100:1, and 10:1.
+  * Performance evaluation: We can use [ali](https://github.com/nakabonne/ali) to create HTTP traffic and visualize the outcomes in real-time for performance evaluation. 
+  * Performance optimization: We can use [Criterion.rs](https://github.com/bheisler/criterion.rs?tab=readme-ov-file#features) and [bencher](https://github.com/bluss/bencher) to collect statistics to enable statistics-driven optimizations. In addition, we can set up a performance baseline to compare the performance with our implementation. We can measure different metrics, for example, response time, throughput, etc.  
+  
 
 ## Trade-offs and Potential Problems
 * Balancing between metadata retrieval speed and storage efficiency.
