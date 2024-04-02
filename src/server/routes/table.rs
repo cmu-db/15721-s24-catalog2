@@ -9,6 +9,8 @@ use crate::common::result::{self, EmptyResult, ErrorType, JsonResult, Location, 
 use crate::{err, ok_empty, ok_json};
 // use rocket::serde::json::Json;
 // use rocket::Error;
+use crate::catalog::table::Table;
+use crate::catalog::namespace::Namespace;
 
 
 pub type JsonResultGeneric<T> = Result<Json<T>>;
@@ -22,29 +24,50 @@ use rocket::{
 
 use crate::db::DB;
 
+
+fn hash<'a>(level: &Vec<String>) -> String {
+  if level.is_empty() {
+    "root".to_string()
+  } else {
+    format!("root::{}", level.join("::"))
+  }
+}
+
+fn unhash(hashed: &str) -> Vec<String> {
+  if hashed == "root" {
+      Vec::new()
+  } else {
+      hashed.split("::").map(String::from).collect()
+  }
+}
+
 /// List all table identifiers underneath a given namespace
 #[get("/namespaces/<namespace>/tables")]
-pub fn get_table_by_namespace(namespace: &str) -> JsonResultGeneric<ListTablesResponse> {
-  // Initialize TableIdentifier instances
-  let identifiers = vec![
-    TableIdentifier {
-      namespace: Namespace(vec!["accounting".to_string(), "tax".to_string()]),
-      name: "paid".to_string(),
-    },
-    TableIdentifier {
-      namespace: Namespace(vec!["accounting".to_string(), "tax".to_string()]),
-      name: "owed".to_string(),
-    },
-  ];
+pub fn get_table_by_namespace(namespace: &str, db: &State<DB>) -> JsonResultGeneric<ListTablesResponse> {
+  let mut conn = db.get_read_conn()?;
+  let table_names = Table::list(
+    &mut conn,
+    namespace.to_string(), 
+  );
+  let all_table_names = table_names.clone();
+  
+  let mut identifiers = Vec::new();
+  for table_name in all_table_names.into_iter().flatten() {
+      let identifier = TableIdentifier {
+          namespace: NamespaceResponse(vec![namespace.to_string()], ), // Assuming namespace is a Vec<String>
+          name: table_name.clone(),
+      };
+      identifiers.push(identifier);
+  }
 
-  let error = false;
-  if !error {
+  if identifiers.is_empty() {
     return err!(
-      ErrorType::NotFound,
-      Location::Table,
-      format!("Table not found")
+        ErrorType::NotFound,
+        Location::Table,
+        format!("No tables found for the specified namespace")
     );
   }
+
   // Create and return ListTablesResponse
   let response = ListTablesResponse { identifiers };
 
@@ -52,9 +75,15 @@ pub fn get_table_by_namespace(namespace: &str) -> JsonResultGeneric<ListTablesRe
 }
 
 /// Create a table in the given namespace
+// TODO: check whether namespace exists first
 #[post("/namespaces/<namespace>/tables", data = "<create_table_request>")]
 pub fn post_table_by_namespace(namespace: &str, create_table_request: Json<CreateTableRequest>, db: &State<DB>) -> JsonResultGeneric<CreateTableResponse> {
-  
+  let mut conn = db.get_write_conn()?;
+  let new_table = Table::create(
+    &mut conn,
+    namespace.to_string(),
+    create_table_request.name.clone().to_string(), // FIXME: this is a clone, can it be avoided?
+  )?;
   
   // Generate metadata for the newly created table
   let metadata = TableMetadata {
@@ -89,7 +118,15 @@ pub fn register_table(namespace: &str, register_table_request: Json<RegisterTabl
 
 /// Load a table from the catalog
 #[get("/namespaces/<namespace>/tables/<table>")]
-pub fn get_table(namespace: &str, table: &str) -> JsonResultGeneric<LoadTableResponse> {
+pub fn get_table(namespace: &str, table: &str, db: &State<DB>) -> JsonResultGeneric<LoadTableResponse> {
+  let conn = db.get_read_conn()?;
+  let table_data = Table::get(
+    &conn,
+    namespace.to_string(),
+    table.to_string(), // FIXME: this is a clone, can it be avoided?
+  );
+  
+  // TODO: update to real metadata
   // Generate metadata for the newly created table
   let metadata = TableMetadata {
     format_version: 1,
@@ -107,30 +144,7 @@ pub fn get_table(namespace: &str, table: &str) -> JsonResultGeneric<LoadTableRes
 /// Commit updates to a table
 #[post("/namespaces/<namespace>/tables/<table>", data = "<commit_table_request>")]
 pub fn post_table(namespace: &str, table: &str, commit_table_request: Json<CommitTableRequest>) -> JsonResultGeneric<CommitTableResponse> {
-  // let bad_request = namespace.is_empty() || table.is_empty();
-  // // let bad_request = true;
-  // let post_success = false;
-  // let namespace_found = false;
-  // let table_exist_already = false;
-
-  // if bad_request{
-  //   status::Custom(Status::BadRequest, content::RawJson("{ \"Error 400 BadRequest\": \"Namespace or table name empty\" }")) 
-  // } else {
-  //   if post_success{
-  //     status::Custom(Status::Ok, content::RawJson("")) // successful request 200
-  //   } else {
-  //     if !namespace_found{
-  //       status::Custom(Status::NotFound, content::RawJson("{ \"Error 404 NotFound\": \"Namespace not found\" }"))
-  //     } else {
-  //       if table_exist_already{
-  //         status::Custom(Status::Conflict, content::RawJson("{ \"Error 409 Conflict\": \"Table exist already\" }"))
-  //       } else {
-  //         status::Custom(Status::InternalServerError, content::RawJson("{ \"Error 5XX Others\": \"Server error\" }"))
-  //       }
-  //     }
-  //   }
-  // }
-
+  // TODO: need to update metadata
   // Generate metadata for the newly created table
   let metadata = TableMetadata {
     format_version: 1,
@@ -150,59 +164,20 @@ pub fn post_table(namespace: &str, table: &str, commit_table_request: Json<Commi
 
 /// Drop a table from the catalog
 #[delete("/namespaces/<namespace>/tables/<table>?<purge_requested..>")]
-pub fn delete_table(namespace: &str, table: &str, purge_requested: PurgeRequested) -> EmptyResult {
-  // // let bad_request = namespace.is_empty() || table.is_empty();
-  // let bad_request = true;
-  // let delete_success = true;
-  // let table_found = false;
-
-  // if bad_request{
-  //   status::Custom(Status::BadRequest, content::RawJson("{ \"Error 400 BadRequest\": \"Namespace or table name empty\" }")) 
-  // } else {
-  //   if delete_success{
-  //     status::Custom(Status::NoContent, content::RawJson("")) // 204 successful request
-  //   } else {
-  //     if !table_found{
-  //       status::Custom(Status::NotFound, content::RawJson("{ \"Error 404 NotFound\": \"Table not found\" }"))
-  //     } else {
-  //       status::Custom(Status::InternalServerError, content::RawJson("{ \"Internal server error\": \"testing\" }"))
-  //     }
-  //   }
-  // }
-  let error = false;
-  match !error {
-    // true => Ok(()),
-    true => ok_empty!(),
-    false => err!(
-      ErrorType::NotFound,
-      Location::Table,
-      format!("Table not found")
-    ),
-  }
+pub fn delete_table(namespace: &str, table: &str, purge_requested: PurgeRequested, db: &State<DB>) -> EmptyResult {
+  let mut conn = db.get_write_conn()?;
+  Table::delete(&mut conn, namespace.to_string(), table.to_string())?;
+  ok_empty!()
 }
 
 /// Check if a table exists
 #[head("/namespaces/<namespace>/tables/<table>")]
-pub fn head_table(namespace: &str, table: &str) -> EmptyResult {
-  // let bad_request = false;
-  // let table_found = true;
-  // let error_occur = true;
+pub fn head_table(namespace: &str, table: &str, db: &State<DB>) -> EmptyResult {
+  let conn = db.get_read_conn()?;
+  let exists = Table::exists(&conn, namespace.to_string(), table.to_string());
 
-  // if bad_request{
-  //   status::Custom(Status::BadRequest, content::RawJson("{ \"Error 400 BadRequest\": \"Namespace or table name empty\" }")) 
-  // } else {
-  //   if !error_occur{
-  //     if table_found{
-  //       status::Custom(Status::NoContent, content::RawJson("")) // 204 successful request
-  //     } else {
-  //       status::Custom(Status::NotFound, content::RawJson("{ \"Error 404 NotFound\": \"Table not found\" }"))
-  //     }
-  //   } else {
-  //     status::Custom(Status::InternalServerError, content::RawJson("{ \"Internal server error\": \"testing\" }"))
-  //   }
-  // }
-  let error = false;
-  match !error {
+  // let error = false;
+  match exists {
     // true => Ok(()),
     true => ok_empty!(),
     false => err!(
@@ -215,35 +190,24 @@ pub fn head_table(namespace: &str, table: &str) -> EmptyResult {
 
 /// Rename a table from its current name to a new name
 #[post("/tables/rename", data = "<rename_table_request>")]
-pub fn rename_table(rename_table_request: Json<RenameTableRequest>) -> EmptyResult {
-  // let bad_request = true;
-  // let table_renamed = false;
-  // let namespace_found = false;
-  // let table_found = false;
+pub fn rename_table(rename_table_request: Json<RenameTableRequest>, db: &State<DB>) -> EmptyResult {
+  let mut conn = db.get_write_conn()?;
+  // Table::rename(&mut conn, namespace.to_string(), table.to_string())?;
+  let tmp = &rename_table_request.source.namespace.0;
+  let namespace_hash = hash(&tmp);
 
-  // if bad_request{
-  //   status::Custom(Status::BadRequest, content::RawJson("{ \"Error 400 BadRequest\": \"Namespace or table name empty\" }"))
-  // } else {
-  //   if table_renamed {
-  //     status::Custom(Status::NoContent, content::RawJson("")) // 204 successful request
-  //   } else {
-  //     if !namespace_found{
-  //       status::Custom(Status::NotFound, content::RawJson("{ \"Error 404 NotFound\": \"Namespace not found\" }"))
-  //     } else if !table_found{
-  //       status::Custom(Status::NotFound, content::RawJson("{ \"Error 404 NotFound\": \"Table not found\" }"))
-  //     } else {
-  //       status::Custom(Status::InternalServerError, content::RawJson("{ \"Internal server error\": \"testing\" }"))
-  //     }
-  //   }
+  // Table::rename(&mut conn, "a".to_string(), rename_table_request.source.name.clone(), rename_table_request.destination.name.clone());
+  Table::rename(&mut conn, namespace_hash, rename_table_request.source.name.clone(), rename_table_request.destination.name.clone());
+  ok_empty!()
+
+  // let error = false;
+  // match !error {
+  //   // true => Ok(()),
+  //   true => ok_empty!(),
+  //   false => err!(
+  //     ErrorType::NotFound,
+  //     Location::Table,
+  //     format!("Table not found")
+  //   ),
   // }
-  let error = false;
-  match !error {
-    // true => Ok(()),
-    true => ok_empty!(),
-    false => err!(
-      ErrorType::NotFound,
-      Location::Table,
-      format!("Table not found")
-    ),
-  }
 }

@@ -5,7 +5,7 @@ use crate::server::routes::common::*;
 #[serde(crate = "rocket::serde")]
 // #[derive(serde::Deserialize)]
 pub struct CreateTableRequest {
-    name: String,
+    pub name: String,
     // location: Option<String>,
     // schema: Schema,
     // #[serde(rename = "partition-spec")]
@@ -22,7 +22,7 @@ pub struct CreateTableRequest {
 pub struct RegisterTableRequest {
   name: String,
   #[serde(rename = "metadata-location")]
-  metadata_location: String,
+  metadata_location: String, // TODO: need to modify to table schema
 }
 
 #[derive(Deserialize)]

@@ -26,6 +26,7 @@ pub type NamespaceRef = Rc<Namespace>;
 pub struct Namespace {
   pub child: Vec<NamespaceIdent>,
   pub properties: Value,
+  pub tables: Vec<String>,
 }
 
 fn hash<'a>(level: &Vec<NamespaceIdent>) -> String {
@@ -68,7 +69,7 @@ impl Namespace {
     )
   }
 
-  // exist will not return an error
+  // exist will not return an error 
   pub fn create(
     conn: &mut DBConnection,
     level: &Vec<NamespaceIdent>,
@@ -92,6 +93,7 @@ impl Namespace {
     let namespace = Namespace {
       child: vec![],
       properties: Value::Object(new_properties.to_owned()),
+      tables: vec![],
     };
     conn.put(key.as_str(), &namespace)?;
     Ok(namespace)
