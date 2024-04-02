@@ -29,7 +29,8 @@ rust-version = "1.75.0"
 [dependencies]
 rocket = { version = "0.5.0", features = ["json", "http2"] }
 # iceberg = { src = "./libs/iceberg" }
-dotenv = "0.15.0"
+# dotenv = "0.15.0"
 pickledb = "^0.5.0"
 derive_builder = "0.20.0"
 serde_json = "1.0.79"
+clap = { version = "4.5.4", features = ["derive"] }
