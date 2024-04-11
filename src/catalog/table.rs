@@ -38,14 +38,14 @@ impl Table {
     let table_name = table.clone();
     let table_clone = table.clone();
 
-    // TODO: add checking for whether namespace exists
-    // if !conn.exists(&namespace){
-    //     return err!(
-    //         ErrorType::NotFound,
-    //         Location::Table, // ??
-    //         format!("Namespace {} not found", namespace)
-    //     );
-    // }
+    // add checking for whether namespace exists
+    if !conn.exists(&namespace){
+        return err!(
+            ErrorType::NotFound,
+            Location::Namespace, // ??
+            format!("Namespace {} not found", namespace)
+        );
+    }
 
     if Table::exists(conn, namespace, table) {
       return err!(
@@ -58,25 +58,33 @@ impl Table {
     let new_table = Table { name: table_name };
     conn.put(&table_key, &new_table)?;
 
-    // TODO: add the table to the namespace tables
+    // add the table to the namespace tables
     if let Some(mut namespace_instance) = conn.get::<Namespace>(&namespace_key){
       namespace_instance.tables.push(table_clone.clone());
       conn.put(&namespace_key, &namespace_instance);
     }
     
-
     Ok(new_table)
   }
 
   pub fn delete(conn: &mut DBConnection, namespace: String, table: String) -> Result<()> {
     let table_key = format!("{}_{}", namespace, table);
     let table_name = table.clone();
-    if !Table::exists(conn, namespace, table) {
+    if !Table::exists(conn, namespace.clone(), table) {
       return err!(
         ErrorType::NotFound,
         Location::Table,
         format!("Table {} not found", table_key)
       );
+    }
+
+    let namespace_key = namespace.clone();
+    if let Some(mut namespace_instance) = conn.get::<Namespace>(&namespace_key) {
+        // Remove the table from the namespace's tables vector
+        if let Some(index) = namespace_instance.tables.iter().position(|t| t == &table_name) {
+            namespace_instance.tables.remove(index);
+            conn.put(&namespace_key, &namespace_instance)?;
+        }
     }
 
     conn.delete(&table_key)
@@ -86,6 +94,16 @@ impl Table {
     let key = namespace;
     // let namespace_instance = conn.get(key);
     // let tables = namespace_instance.tables;
+    
+    // add checking for whether namespace exists
+    // let namespace_clone = namespace.clone();
+    // if !conn.exists(&namespace_clone){
+    //   return err!(
+    //       ErrorType::NotFound,
+    //       Location::Namespace, 
+    //       format!("Namespace {} not found", namespace_clone)
+    //   );
+    // }
 
     if let Some(namespace_instance) = conn.get::<Namespace>(&key) {
       Some(namespace_instance.tables.clone())

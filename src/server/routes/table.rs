@@ -71,7 +71,7 @@ pub fn post_table_by_namespace(
   let new_table = Table::create(
     &mut conn,
     hash_key.to_string(),
-    create_table_request.name.clone().to_string(), // FIXME: this is a clone, can it be avoided?
+    create_table_request.name.clone().to_string(),
   )?;
 
   // Generate metadata for the newly created table
