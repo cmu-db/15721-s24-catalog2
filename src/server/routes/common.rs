@@ -102,3 +102,26 @@ pub struct TableMetadata {
   // pub snapshot_log: SnapshotLog,
   // pub metadata_log: MetadataLog,
 }
+
+use std::sync::atomic::{AtomicUsize, Ordering};
+
+pub struct TableMetadataAtomicIncr {
+  table_uuid_counter: AtomicUsize,
+}
+
+impl TableMetadataAtomicIncr {
+  pub fn new() -> Self {
+    TableMetadataAtomicIncr {
+      table_uuid_counter: AtomicUsize::new(0),
+    }
+  }
+
+  pub fn generate_table_metadata(&self, format_version: i32) -> TableMetadata {
+    let uuid = self.table_uuid_counter.fetch_add(1, Ordering::SeqCst);
+    let table_uuid = format!("uuid{}", uuid); // Generate UUID based on the counter value
+    TableMetadata {
+      format_version,
+      table_uuid,
+    }
+  }
+}

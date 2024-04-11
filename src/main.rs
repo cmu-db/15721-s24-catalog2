@@ -10,18 +10,23 @@ extern crate rocket;
 
 use db::DB;
 
-use server::{catches, routes::*};
+use server::{
+  catches,
+  routes::{common::TableMetadataAtomicIncr, *},
+};
 
 #[launch]
 pub fn rocket() -> _ {
   let cli = cli::parse();
   let db = DB::new(cli.db_root.unwrap());
+  let table_metedata_generator = TableMetadataAtomicIncr::new();
   if db.is_err() {
     panic!("Failed to initialize database: {:?}", db.err());
   }
 
   rocket::build()
     .manage(db.unwrap())
+    .manage(table_metedata_generator)
     .attach(namespace::stage())
     .attach(catches::stage())
     .mount(

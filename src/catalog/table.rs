@@ -6,7 +6,10 @@ use crate::{
   server::routes::common::*,
   util::time,
 };
-use rocket::serde::{Deserialize, Serialize};
+use rocket::{
+  serde::{Deserialize, Serialize},
+  State,
+};
 use serde_json::{json, Value};
 
 // use crate::Location::Namespace; // TODO: update
@@ -32,7 +35,12 @@ impl Table {
     // TODO: probably want to know whether it is namespace not found or table not found
   }
 
-  pub fn create(conn: &mut DBConnection, namespace: String, table: String) -> Result<Table> {
+  pub fn create(
+    conn: &mut DBConnection,
+    namespace: String,
+    table: String,
+    table_metedata_generator: &State<TableMetadataAtomicIncr>,
+  ) -> Result<Table> {
     let namespace_key = namespace.clone();
     let table_key = format!("{}_{}", namespace, table);
     let table_name = table.clone();
@@ -65,10 +73,7 @@ impl Table {
         schema_id: 0,                 // Set schema_id to a valid value
         identifier_field_ids: vec![], // Provide identifier_field_ids if needed
       },
-      metadata: TableMetadata {
-        format_version: 2,                         // Set format_version to a valid value
-        table_uuid: "test_table_uuid".to_string(), // Provide a table_uuid
-      },
+      metadata: table_metedata_generator.generate_table_metadata(1),
     };
     conn.put(&table_key, &new_table)?;
 

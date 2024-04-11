@@ -65,6 +65,7 @@ pub fn post_table_by_namespace(
   namespace: NamespaceParam,
   create_table_request: Json<CreateTableRequest>,
   db: &State<DB>,
+  table_metedata_generator: &State<TableMetadataAtomicIncr>,
 ) -> JsonResultGeneric<CreateTableResponse> {
   let mut conn = db.get_write_conn()?;
   let hash_key = hash(&namespace.0);
@@ -72,6 +73,7 @@ pub fn post_table_by_namespace(
     &mut conn,
     hash_key.to_string(),
     create_table_request.name.clone().to_string(),
+    table_metedata_generator,
   )?;
 
   // Generate metadata for the newly created table
