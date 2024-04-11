@@ -3,12 +3,12 @@ use std::rc::Rc;
 use crate::{
   common::result::{ErrorType, Location, Result},
   err,
+  server::routes::common::*,
   util::time,
 };
 use rocket::serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
-use crate::server::routes::common::TableIdentifier;
 // use crate::Location::Namespace; // TODO: update
 use crate::catalog::namespace::Namespace;
 
@@ -19,8 +19,8 @@ use crate::db::DBConnection;
 pub struct Table {
   pub name: String,
   //   pub properties: Value,
-  // TODO: add schema
-  // TODO: add metadata
+  pub schema: Schema,
+  pub metadata: TableMetadata,
 }
 
 impl Table {
@@ -39,12 +39,12 @@ impl Table {
     let table_clone = table.clone();
 
     // add checking for whether namespace exists
-    if !conn.exists(&namespace){
-        return err!(
-            ErrorType::NotFound,
-            Location::Namespace, // ??
-            format!("Namespace {} not found", namespace)
-        );
+    if !conn.exists(&namespace) {
+      return err!(
+        ErrorType::NotFound,
+        Location::Namespace, // ??
+        format!("Namespace {} not found", namespace)
+      );
     }
 
     if Table::exists(conn, namespace, table) {
@@ -54,16 +54,30 @@ impl Table {
         format!("Table {} already exists", table_key)
       );
     }
-
-    let new_table = Table { name: table_name };
+    let new_table = Table {
+      name: table_name,
+      schema: Schema {
+        // struct_type: StructType {
+        //   type_: "".to_string(),
+        //   fields: vec![],
+        //   // Populate StructType fields as needed
+        // },
+        schema_id: 0,                 // Set schema_id to a valid value
+        identifier_field_ids: vec![], // Provide identifier_field_ids if needed
+      },
+      metadata: TableMetadata {
+        format_version: 1,          // Set format_version to a valid value
+        table_uuid: "".to_string(), // Provide a table_uuid
+      },
+    };
     conn.put(&table_key, &new_table)?;
 
     // add the table to the namespace tables
-    if let Some(mut namespace_instance) = conn.get::<Namespace>(&namespace_key){
+    if let Some(mut namespace_instance) = conn.get::<Namespace>(&namespace_key) {
       namespace_instance.tables.push(table_clone.clone());
       conn.put(&namespace_key, &namespace_instance);
     }
-    
+
     Ok(new_table)
   }
 
@@ -80,11 +94,15 @@ impl Table {
 
     let namespace_key = namespace.clone();
     if let Some(mut namespace_instance) = conn.get::<Namespace>(&namespace_key) {
-        // Remove the table from the namespace's tables vector
-        if let Some(index) = namespace_instance.tables.iter().position(|t| t == &table_name) {
-            namespace_instance.tables.remove(index);
-            conn.put(&namespace_key, &namespace_instance)?;
-        }
+      // Remove the table from the namespace's tables vector
+      if let Some(index) = namespace_instance
+        .tables
+        .iter()
+        .position(|t| t == &table_name)
+      {
+        namespace_instance.tables.remove(index);
+        conn.put(&namespace_key, &namespace_instance)?;
+      }
     }
 
     conn.delete(&table_key)
@@ -94,13 +112,13 @@ impl Table {
     let key = namespace;
     // let namespace_instance = conn.get(key);
     // let tables = namespace_instance.tables;
-    
+
     // add checking for whether namespace exists
     // let namespace_clone = namespace.clone();
     // if !conn.exists(&namespace_clone){
     //   return err!(
     //       ErrorType::NotFound,
-    //       Location::Namespace, 
+    //       Location::Namespace,
     //       format!("Namespace {} not found", namespace_clone)
     //   );
     // }

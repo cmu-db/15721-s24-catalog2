@@ -41,8 +41,8 @@ pub struct StructField {
 #[serde(crate = "rocket::serde")]
 pub struct StructType {
   #[serde(rename = "type")]
-  type_: String,
-  fields: Vec<StructField>,
+  pub type_: String,
+  pub fields: Vec<StructField>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -73,8 +73,32 @@ pub struct MapType {
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct Schema {
-  #[serde(flatten)]
-  struct_type: StructType,
-  schema_id: i32,
-  identifier_field_ids: Vec<i32>,
+  // #[serde(flatten)]
+  // pub struct_type: StructType, // TODO: update!
+  pub schema_id: i32,
+  pub identifier_field_ids: Vec<i32>,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct TableMetadata {
+  pub format_version: i32,
+  pub table_uuid: String,
+  // pub location: Option<String>,
+  // pub last_updated_ms: Option<i64>,
+  // pub properties: HashMap<String, String>,
+  // pub schemas: Vec<Schema>,
+  // pub current_schema_id: Option<i32>,
+  // pub last_column_id: Option<i32>,
+  // pub partition_specs: Vec<PartitionSpec>,
+  // pub default_spec_id: Option<i32>,
+  // pub last_partition_id: Option<i32>,
+  // pub sort_orders: Vec<SortOrder>,
+  // pub default_sort_order_id: Option<i32>,
+  // pub snapshots: Vec<Snapshot>,
+  // pub refs: SnapshotReferences,
+  // pub current_snapshot_id: Option<i64>,
+  // pub last_sequence_number: Option<i64>,
+  // pub snapshot_log: SnapshotLog,
+  // pub metadata_log: MetadataLog,
 }
