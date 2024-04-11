@@ -36,6 +36,7 @@ impl Table {
     let namespace_key = namespace.clone();
     let table_key = format!("{}_{}", namespace, table);
     let table_name = table.clone();
+    let table_clone = table.clone();
 
     // TODO: add checking for whether namespace exists
     // if !conn.exists(&namespace){
@@ -58,10 +59,11 @@ impl Table {
     conn.put(&table_key, &new_table)?;
 
     // TODO: add the table to the namespace tables
-    // if let Some(mut namespace) = conn.get::<Namespace>(&namespace_key)? {
-    //     namespace.tables.push(new_table_name.clone());
-    //     conn.put(&namespace_key, &namespace)?;
-    // }
+    if let Some(mut namespace_instance) = conn.get::<Namespace>(&namespace_key){
+      namespace_instance.tables.push(table_clone.clone());
+      conn.put(&namespace_key, &namespace_instance);
+    }
+    
 
     Ok(new_table)
   }
@@ -122,7 +124,6 @@ impl Table {
     }
 
     // true
-
     let namespace_key = namespace_name.clone();
     if let Some(mut namespace) = conn.get::<Namespace>(&namespace_key) {
       if let Some(index) = namespace

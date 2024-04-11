@@ -62,14 +62,15 @@ pub fn get_table_by_namespace(
 // TODO: check whether namespace exists first
 #[post("/namespaces/<namespace>/tables", data = "<create_table_request>")]
 pub fn post_table_by_namespace(
-  namespace: &str,
+  namespace: NamespaceParam,
   create_table_request: Json<CreateTableRequest>,
   db: &State<DB>,
 ) -> JsonResultGeneric<CreateTableResponse> {
   let mut conn = db.get_write_conn()?;
+  let hash_key = hash(&namespace.0);
   let new_table = Table::create(
     &mut conn,
-    namespace.to_string(),
+    hash_key.to_string(),
     create_table_request.name.clone().to_string(), // FIXME: this is a clone, can it be avoided?
   )?;
 
@@ -167,21 +168,23 @@ pub fn post_table(
 /// Drop a table from the catalog
 #[delete("/namespaces/<namespace>/tables/<table>?<purge_requested..>")]
 pub fn delete_table(
-  namespace: &str,
+  namespace: NamespaceParam,
   table: &str,
   purge_requested: PurgeRequested,
   db: &State<DB>,
 ) -> EmptyResult {
   let mut conn = db.get_write_conn()?;
-  Table::delete(&mut conn, namespace.to_string(), table.to_string())?;
+  let hash_key = hash(&namespace.0);
+  Table::delete(&mut conn, hash_key.to_string(), table.to_string())?;
   ok_empty!()
 }
 
 /// Check if a table exists
 #[head("/namespaces/<namespace>/tables/<table>")]
-pub fn head_table(namespace: &str, table: &str, db: &State<DB>) -> EmptyResult {
+pub fn head_table(namespace: NamespaceParam, table: &str, db: &State<DB>) -> EmptyResult {
   let conn = db.get_read_conn()?;
-  let exists = Table::exists(&conn, namespace.to_string(), table.to_string());
+  let hash_key = hash(&namespace.0);
+  let exists = Table::exists(&conn, hash_key.to_string(), table.to_string());
 
   // let error = false;
   match exists {
