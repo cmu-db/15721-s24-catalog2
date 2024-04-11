@@ -66,8 +66,8 @@ impl Table {
         identifier_field_ids: vec![], // Provide identifier_field_ids if needed
       },
       metadata: TableMetadata {
-        format_version: 1,          // Set format_version to a valid value
-        table_uuid: "".to_string(), // Provide a table_uuid
+        format_version: 2,                         // Set format_version to a valid value
+        table_uuid: "test_table_uuid".to_string(), // Provide a table_uuid
       },
     };
     conn.put(&table_key, &new_table)?;

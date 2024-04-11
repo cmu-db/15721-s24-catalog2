@@ -77,7 +77,7 @@ pub fn post_table_by_namespace(
   // Generate metadata for the newly created table
   let metadata = TableMetadata {
     format_version: new_table.metadata.format_version,
-    table_uuid: "generated_uuid".to_string(),
+    table_uuid: new_table.metadata.table_uuid,
     // Fill in other fields as needed
   };
 
@@ -117,17 +117,18 @@ pub fn get_table(
 ) -> JsonResultGeneric<LoadTableResponse> {
   let conn = db.get_read_conn()?;
   let hash_key = hash(&namespace.0);
-  let table_data = Table::get(
+  let table_data_option = Table::get(
     &conn,
     hash_key.to_string(),
     table.to_string(), // FIXME: this is a clone, can it be avoided?
   );
 
   // TODO: update to real metadata
+  let table_data = table_data_option.unwrap();
   // Generate metadata for the newly created table
   let metadata = TableMetadata {
-    format_version: table_data.unwrap().metadata.format_version,
-    table_uuid: "generated_uuid".to_string(),
+    format_version: table_data.metadata.format_version,
+    table_uuid: table_data.metadata.table_uuid,
     // Fill in other fields as needed
   };
 
