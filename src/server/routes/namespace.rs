@@ -8,7 +8,7 @@ use rocket::request::FromParam;
 use rocket::{
   serde::{
     json::{Json, Value},
-    Deserialize,
+    Deserialize, Serialize,
   },
   State,
 };
@@ -17,12 +17,12 @@ use crate::db::DB;
 
 pub struct NamespaceParam(pub Vec<NamespaceIdent>);
 
-use rocket::http::Status;
-use rocket::response::{content, status};
 use super::*;
-use rocket::local::asynchronous::Client;
-use rocket::http::ContentType;
 use crate::request::*;
+use rocket::http::ContentType;
+use rocket::http::Status;
+use rocket::local::asynchronous::Client;
+use rocket::response::{content, status};
 
 /// Returns an instance of `PasteId` if the path segment is a valid ID.
 /// Otherwise returns the invalid ID as the `Err` value.
@@ -54,13 +54,13 @@ impl TryFrom<&str> for NamespaceParam {
   }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 #[serde(crate = "rocket::serde")]
 // Create Namespace Request
 pub struct CreateNamespaceRequest {
-  namespace: Vec<NamespaceIdent>,
+  pub namespace: Vec<NamespaceIdent>,
   // Configured string to string map of properties for the namespace
-  properties: Option<Value>,
+  pub properties: Option<Value>,
 }
 
 #[derive(Deserialize)]
@@ -197,4 +197,3 @@ pub fn stage() -> rocket::fairing::AdHoc {
       .mount("/v1", routes![get]) // for a query parameter
   })
 }
-
