@@ -17,6 +17,13 @@ use crate::db::DB;
 
 pub struct NamespaceParam(pub Vec<NamespaceIdent>);
 
+use rocket::http::Status;
+use rocket::response::{content, status};
+use super::*;
+use rocket::local::asynchronous::Client;
+use rocket::http::ContentType;
+use crate::request::*;
+
 /// Returns an instance of `PasteId` if the path segment is a valid ID.
 /// Otherwise returns the invalid ID as the `Err` value.
 impl<'r> FromParam<'r> for NamespaceParam {
@@ -190,3 +197,4 @@ pub fn stage() -> rocket::fairing::AdHoc {
       .mount("/v1", routes![get]) // for a query parameter
   })
 }
+

@@ -1,7 +1,8 @@
 use crate::server::routes::common::*;
 use rocket::serde::Deserialize;
+use rocket::serde::Serialize;
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 // #[derive(serde::Deserialize)]
 pub struct CreateTableRequest {
