@@ -13,6 +13,9 @@ use crate::server::routes::namespace::NamespaceParam;
 use crate::DB;
 use rocket::State;
 
+use super::*;
+use rocket::local::asynchronous::Client;
+
 pub type JsonResultGeneric<T> = Result<Json<T>>;
 
 fn hash<'a>(level: &Vec<String>) -> String {
@@ -218,15 +221,20 @@ pub fn rename_table(rename_table_request: Json<RenameTableRequest>, db: &State<D
     rename_table_request.destination.name.clone(),
   )?;
   ok_empty!()
-
-  // let error = false;
-  // match !error {
-  //   // true => Ok(()),
-  //   true => ok_empty!(),
-  //   false => err!(
-  //     ErrorType::NotFound,
-  //     Location::Table,
-  //     format!("Table not found")
-  //   ),
-  // }
 }
+
+
+#[rocket::async_test]
+async fn test_get_table_by_namespace() {
+  let client = Client::tracked(crate::rocket()).await.expect("valid rocket instance");
+
+    // test 1
+    let response = client.get("/v1/namespaces/namespacename/tables").dispatch().await;
+    assert_eq!(response.status(), Status::NotFound);
+
+    // test 2
+    let response = client.get("/v1/namespaces/newnamespace/tables").dispatch().await;
+    assert_eq!(response.status(), Status::Ok);
+}
+
+
