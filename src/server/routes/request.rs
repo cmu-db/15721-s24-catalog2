@@ -82,7 +82,7 @@ pub struct PurgeRequested {
   purge_requested: Option<bool>,
 }
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct RenameTableRequest {
   pub source: TableIdentifier,

@@ -231,121 +231,81 @@ pub fn rename_table(rename_table_request: Json<RenameTableRequest>, db: &State<D
   ok_empty!()
 }
 
+
+
 #[rocket::async_test]
 async fn test_get_table_by_namespace_empty_result() {
   let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
   let client = create_mock_client(temp_dir.path().to_path_buf()).await;
   
   let namespace_name = "namespacenametest";
-  let create_namespace_request = CreateNamespaceRequest {
-        namespace: vec![namespace_name.to_string()],
-        properties: None,
-  };
-  let create_namespace_json = serde_json::to_string(&create_namespace_request)
-        .expect("Failed to serialize CreateNamespaceRequest to JSON");
-  
-  let response = client.get("/v1/namespaces/namespacenametest/tables").dispatch().await;
+  let url = format!("/v1/namespaces/{}/tables", namespace_name);
+  let response = client.get(&url).dispatch().await;
   
   assert_eq!(response.status(), Status::NotFound);
 }
 
-// #[rocket::async_test]
-// async fn test_get_table_by_namespace_result_found() {
-//   let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
-//   let client = create_mock_client(temp_dir.path().to_path_buf()).await;
-
-//   let namespace_name = "namespacenametest";
-//   let create_namespace_request = CreateNamespaceRequest {
-//     namespace: vec![namespace_name.to_string()], // Use String directly
-//     properties: None,                            // Adjust as needed
-//   };
-//   let create_namespace_request_json = Json(create_namespace_request);
-//   let create_namespace_request_json_bytes = serde_json::to_vec(&create_namespace_request_json.into_inner()).unwrap();
-
-//   let response = client.post("/v1/namespaces")
-//       .header(ContentType::JSON)
-//       .body(create_namespace_request_json_bytes)
-//       .dispatch()
-//       .await;
-
-//   assert_eq!(response.status(), Status::Ok);
-
-//   let get_response = client
-//     .get("/v1/namespaces/namespacenametest/tables")
-//     .dispatch()
-//     .await;
-//   assert_eq!(get_response.status(), Status::Ok);
-
-
-
-//   // TODO: configure DB
-//   // let create_namespace_request = CreateNamespaceRequest {
-//   //   namespace: vec!["namespacename".to_string()],
-//   //   properties: None,
-//   // };
-//   // let create_namespace_json = serde_json::to_string(&create_namespace_request)
-//   //       .expect("Failed to serialize CreateNamespaceRequest to JSON");
-
-//   // let response = client.get("/v1/namespaces/newnamespace/tables").dispatch().await;
-//   // assert_eq!(response.status(), Status::Ok);
-// }
-
-// #[rocket::async_test]
-// async fn test_post_table_by_namespace() {
-//   let client = Client::tracked(crate::rocket())
-//     .await
-//     .expect("valid rocket instance");
-
-//   let namespace_name = "newnamespace";
-//   let create_table_request = CreateTableRequest {
-//     name: "table_name".to_string(),
-//   };
-//   let create_table_request_json = Json(create_table_request);
-//   let json_bytes = serde_json::to_vec(&create_table_request_json.into_inner()).unwrap();
-
-//   let response = client
-//     .post(format!("/v1/namespaces/{}/tables", namespace_name))
-//     .header(ContentType::JSON)
-//     .body(json_bytes)
-//     .dispatch()
-//     .await;
-
-//   assert_eq!(response.status(), Status::Ok);
-// }
-
-// #[rocket::async_test]
-// async fn test_get_table_by_namespace_empty_result() {
-//   let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
-//   let db_test = DB::new(temp_dir.path().to_path_buf()).expect("failed to create a db");
-
-//   // let client = Client::tracked(crate::rocket().manage(db_test)).await.expect("valid rocket instance");
-//   // let client = Client::tracked(crate::rocket())
-//   //   .await
-//   //   .expect("valid rocket instance");
-
-//   let mut rocket = rocket::build();
-//   rocket = rocket.manage(db_test);
-
-//   let client = Client::tracked(rocket)
-//     .await
-//     .expect("valid rocket instance");
-
-//   let response = client
-//     .get("/v1/namespaces/namespacename/tables")
-//     .dispatch()
-//     .await;
-//   assert_eq!(response.status(), Status::NotFound);
-// }
-
 #[rocket::async_test]
-async fn test_post_table_by_namespace() {
+async fn test_get_table_by_namespace_result_found() {
   let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
   let client = create_mock_client(temp_dir.path().to_path_buf()).await;
 
-  let namespace_name = "lala";
+  let namespace_name = "namespacenametest";
   let create_namespace_request = CreateNamespaceRequest {
     namespace: vec![namespace_name.to_string()], // Use String directly
     properties: None,                            // Adjust as needed
+  };
+  let create_namespace_request_json = Json(create_namespace_request);
+  let create_namespace_request_json_bytes = serde_json::to_vec(&create_namespace_request_json.into_inner()).unwrap();
+
+  let response = client.post("/v1/namespaces")
+      .header(ContentType::JSON)
+      .body(create_namespace_request_json_bytes)
+      .dispatch()
+      .await;
+
+  assert_eq!(response.status(), Status::Ok);
+
+  let url = format!("/v1/namespaces/{}/tables", namespace_name);
+  let get_response = client
+    .get(&url)
+    .dispatch()
+    .await;
+  assert_eq!(get_response.status(), Status::NotFound);
+
+
+  let create_table_request = CreateTableRequest {
+    name: "tablenametest".to_string(),
+  };
+  let create_table_request_json = Json(create_table_request);
+  let json_bytes = serde_json::to_vec(&create_table_request_json.into_inner()).unwrap();
+
+  let post_response = client
+    .post(format!("/v1/namespaces/{}/tables", namespace_name))
+    .header(ContentType::JSON)
+    .body(json_bytes)
+    .dispatch()
+    .await;
+  
+  assert_eq!(post_response.status(), Status::Ok);
+
+  let get_response_2 = client
+    .get(&url)
+    .dispatch()
+    .await;
+  assert_eq!(get_response_2.status(), Status::Ok);
+}
+
+
+#[rocket::async_test]
+async fn test_post_table_by_namespace_new_table() {
+  let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
+  let client = create_mock_client(temp_dir.path().to_path_buf()).await;
+
+  let namespace_name = "testnamespacename";
+  let create_namespace_request = CreateNamespaceRequest {
+    namespace: vec![namespace_name.to_string()], 
+    properties: None,                            
   };
   let create_namespace_request_json = Json(create_namespace_request);
   let create_namespace_request_json_bytes =
@@ -359,23 +319,313 @@ async fn test_post_table_by_namespace() {
     .await;
 
   assert_eq!(response.status(), Status::Ok);
-
-  // Uncomment the following code once you have implemented the create_table function
-  // let create_table_request = CreateTableRequest {
-  //     name: "table_name".to_string(),
-  // };
-  // let create_table_request_json = Json(create_table_request);
-  // let json_bytes = serde_json::to_vec(&create_table_request_json.into_inner()).unwrap();
-
-  // let response = client
-  //     .post(format!("/v1/namespaces/{}/tables", namespace_name))
-  //     .header(ContentType::JSON)
-  //     .body(json_bytes)
-  //     .dispatch()
-  //     .await;
-
-  // assert_eq!(response.status(), Status::Ok);
 }
+
+
+#[rocket::async_test]
+async fn test_post_table_by_namespace_conflict() {
+  let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
+  let client = create_mock_client(temp_dir.path().to_path_buf()).await;
+
+  let namespace_name = "testnamespacename";
+  let create_namespace_request = CreateNamespaceRequest {
+    namespace: vec![namespace_name.to_string()], // Use String directly
+    properties: None,                            // Adjust as needed
+  };
+  let create_namespace_request_json = Json(create_namespace_request);
+  let create_namespace_request_json_bytes =
+    serde_json::to_vec(&create_namespace_request_json.into_inner()).unwrap();
+
+  let response = client
+    .post("/v1/namespaces")
+    .header(ContentType::JSON)
+    .body(create_namespace_request_json_bytes.clone())
+    .dispatch()
+    .await;
+
+  assert_eq!(response.status(), Status::Ok);
+
+  let second_response = client
+    .post("/v1/namespaces")
+    .header(ContentType::JSON)
+    .body(create_namespace_request_json_bytes)
+    .dispatch()
+    .await;
+
+  assert_eq!(second_response.status(), Status::Conflict);
+}
+
+
+#[rocket::async_test]
+async fn test_delete_table_that_exists() {
+  let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
+  let client = create_mock_client(temp_dir.path().to_path_buf()).await;
+
+  let namespace_name = "namespacenametest";
+  let create_namespace_request = CreateNamespaceRequest {
+    namespace: vec![namespace_name.to_string()], // Use String directly
+    properties: None,                            // Adjust as needed
+  };
+  let create_namespace_request_json = Json(create_namespace_request);
+  let create_namespace_request_json_bytes = serde_json::to_vec(&create_namespace_request_json.into_inner()).unwrap();
+
+  let response = client.post("/v1/namespaces")
+      .header(ContentType::JSON)
+      .body(create_namespace_request_json_bytes)
+      .dispatch()
+      .await;
+
+  assert_eq!(response.status(), Status::Ok);
+
+  let url = format!("/v1/namespaces/{}/tables", namespace_name);
+  let get_response = client
+    .get(&url)
+    .dispatch()
+    .await;
+  assert_eq!(get_response.status(), Status::NotFound);
+
+
+  let table_name = "tablenametest";
+  let create_table_request = CreateTableRequest {
+    name: table_name.to_string(),
+  };
+  let create_table_request_json = Json(create_table_request);
+  let json_bytes = serde_json::to_vec(&create_table_request_json.into_inner()).unwrap();
+
+  let post_response = client
+    .post(format!("/v1/namespaces/{}/tables", namespace_name))
+    .header(ContentType::JSON)
+    .body(json_bytes)
+    .dispatch()
+    .await;
+  
+  assert_eq!(post_response.status(), Status::Ok);
+
+  let get_response_2 = client
+    .get(&url)
+    .dispatch()
+    .await;
+  assert_eq!(get_response_2.status(), Status::Ok);
+
+  let delete_url = format!("/v1/namespaces/{}/tables/{}", namespace_name, table_name);
+  let delete_response = client
+    .delete(&delete_url)
+    .dispatch()
+    .await;
+  assert_eq!(delete_response.status(), Status::NoContent);
+}
+
+
+#[rocket::async_test]
+async fn test_delete_table_that_not_exists() {
+  let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
+  let client = create_mock_client(temp_dir.path().to_path_buf()).await;
+
+  let namespace_name = "namespacenametest";
+  let create_namespace_request = CreateNamespaceRequest {
+    namespace: vec![namespace_name.to_string()], // Use String directly
+    properties: None,                            // Adjust as needed
+  };
+  let create_namespace_request_json = Json(create_namespace_request);
+  let create_namespace_request_json_bytes = serde_json::to_vec(&create_namespace_request_json.into_inner()).unwrap();
+
+  let response = client.post("/v1/namespaces")
+      .header(ContentType::JSON)
+      .body(create_namespace_request_json_bytes)
+      .dispatch()
+      .await;
+
+  assert_eq!(response.status(), Status::Ok);
+
+  let url = format!("/v1/namespaces/{}/tables", namespace_name);
+  let get_response = client
+    .get(&url)
+    .dispatch()
+    .await;
+  assert_eq!(get_response.status(), Status::NotFound);
+
+
+  let table_name = "tablenametest";
+  let create_table_request = CreateTableRequest {
+    name: table_name.to_string(),
+  };
+  let create_table_request_json = Json(create_table_request);
+  let json_bytes = serde_json::to_vec(&create_table_request_json.into_inner()).unwrap();
+
+  let post_response = client
+    .post(format!("/v1/namespaces/{}/tables", namespace_name))
+    .header(ContentType::JSON)
+    .body(json_bytes)
+    .dispatch()
+    .await;
+  
+  assert_eq!(post_response.status(), Status::Ok);
+
+  let get_response_2 = client
+    .get(&url)
+    .dispatch()
+    .await;
+  assert_eq!(get_response_2.status(), Status::Ok);
+
+  let table_name_not_exists = "tablenamenotexist";
+  let delete_url = format!("/v1/namespaces/{}/tables/{}", namespace_name, table_name_not_exists);
+  let delete_response = client
+    .delete(&delete_url)
+    .dispatch()
+    .await;
+  assert_eq!(delete_response.status(), Status::NotFound);
+}
+
+
+#[rocket::async_test]
+async fn test_head_table() {
+  let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
+  let client = create_mock_client(temp_dir.path().to_path_buf()).await;
+
+  let namespace_name = "namespacenametest";
+  let create_namespace_request = CreateNamespaceRequest {
+    namespace: vec![namespace_name.to_string()], // Use String directly
+    properties: None,                            // Adjust as needed
+  };
+  let create_namespace_request_json = Json(create_namespace_request);
+  let create_namespace_request_json_bytes = serde_json::to_vec(&create_namespace_request_json.into_inner()).unwrap();
+
+  let response = client.post("/v1/namespaces")
+      .header(ContentType::JSON)
+      .body(create_namespace_request_json_bytes)
+      .dispatch()
+      .await;
+
+  assert_eq!(response.status(), Status::Ok);
+
+  let table_name = "tablenametest";
+
+  let url = format!("/v1/namespaces/{}/tables/{}", namespace_name, table_name);
+  let head_response = client
+    .head(&url)
+    .dispatch()
+    .await;
+  assert_eq!(head_response.status(), Status::NotFound);
+
+  
+  let create_table_request = CreateTableRequest {
+    name: table_name.to_string(),
+  };
+  let create_table_request_json = Json(create_table_request);
+  let json_bytes = serde_json::to_vec(&create_table_request_json.into_inner()).unwrap();
+
+  let post_response = client
+    .post(format!("/v1/namespaces/{}/tables", namespace_name))
+    .header(ContentType::JSON)
+    .body(json_bytes)
+    .dispatch()
+    .await;
+  
+  assert_eq!(post_response.status(), Status::Ok);
+
+  let head_response_2 = client
+    .head(&url)
+    .dispatch()
+    .await;
+  assert_eq!(head_response_2.status(), Status::NoContent);
+}
+
+
+#[rocket::async_test]
+async fn test_rename_table() {
+  let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
+  let client = create_mock_client(temp_dir.path().to_path_buf()).await;
+
+  let namespace_name = "namespacenametest";
+  let create_namespace_request = CreateNamespaceRequest {
+    namespace: vec![namespace_name.to_string()], // Use String directly
+    properties: None,                            // Adjust as needed
+  };
+  let create_namespace_request_json = Json(create_namespace_request);
+  let create_namespace_request_json_bytes = serde_json::to_vec(&create_namespace_request_json.into_inner()).unwrap();
+
+  let response = client.post("/v1/namespaces")
+      .header(ContentType::JSON)
+      .body(create_namespace_request_json_bytes)
+      .dispatch()
+      .await;
+
+  assert_eq!(response.status(), Status::Ok);
+
+  let table_name = "tablenametest";
+  let new_table_name = "renamedtable";
+
+  let url = format!("/v1/namespaces/{}/tables/{}", namespace_name, table_name);
+  let rename_url = format!("/v1/namespaces/{}/tables/{}", namespace_name, new_table_name);
+  let head_response = client
+    .head(&url)
+    .dispatch()
+    .await;
+  assert_eq!(head_response.status(), Status::NotFound);
+
+  
+  let create_table_request = CreateTableRequest {
+    name: table_name.to_string(),
+  };
+  let create_table_request_json = Json(create_table_request);
+  let json_bytes = serde_json::to_vec(&create_table_request_json.into_inner()).unwrap();
+
+  let post_response = client
+    .post(format!("/v1/namespaces/{}/tables", namespace_name))
+    .header(ContentType::JSON)
+    .body(json_bytes)
+    .dispatch()
+    .await;
+  
+  assert_eq!(post_response.status(), Status::Ok);
+
+  let head_response_2 = client
+    .head(&url)
+    .dispatch()
+    .await;
+  assert_eq!(head_response_2.status(), Status::NoContent);
+
+  // rename table
+  // let rename_table_request = RenameTableRequest {
+  //   source:{namespace: vec![namespace_name.to_string()], name: table_name},
+  //   destination: {namespace: vec![namespace_name.to_string()], name: new_table_name},
+  // };
+  let rename_table_request = RenameTableRequest {
+      source: TableIdentifier {
+          namespace: NamespaceResponse(vec![namespace_name.to_string()]),
+          name: table_name.to_string(),
+      },
+      destination: TableIdentifier {
+          namespace: NamespaceResponse(vec![namespace_name.to_string()]),
+          name: new_table_name.to_string(),
+      },
+  };
+  let rename_table_request_json = Json(rename_table_request);
+  let rename_json_bytes = serde_json::to_vec(&rename_table_request_json.into_inner()).unwrap();
+
+  let rename_response = client
+    .post("/v1/tables/rename")
+    .header(ContentType::JSON)
+    .body(rename_json_bytes)
+    .dispatch()
+    .await;
+  assert_eq!(rename_response.status(), Status::NoContent);
+
+  let head_response_3 = client
+    .head(&url)
+    .dispatch()
+    .await;
+  assert_eq!(head_response_3.status(), Status::NotFound);
+
+
+  let head_response_4 = client
+    .head(&rename_url)
+    .dispatch()
+    .await;
+  assert_eq!(head_response_4.status(), Status::NoContent);
+
+}
+
 
 pub async fn create_mock_client(temp_dir: PathBuf) -> Client {
   let db_test = DB::new(temp_dir).expect("failed to create a db");
