@@ -43,7 +43,7 @@ impl DB {
   pub fn new(root_dir: PathBuf) -> Result<DB> {
     println!("starting db in {:?}", root_dir);
     if !std::path::Path::new(&root_dir).exists() {
-      let res = fs::create_dir(root_dir);
+      let res = fs::create_dir(&root_dir);
       if res.is_err() {
         return err!(
           ErrorType::InternalError,
@@ -53,7 +53,7 @@ impl DB {
       }
     }
 
-    let mut conn = DBConnection::new()?;
+    let mut conn = DBConnection::new(&root_dir)?;
     Namespace::init(&mut conn)?;
     Ok(DB {
       conn: RwLock::new(conn),
@@ -94,17 +94,18 @@ impl DBConnection {
     }
   }
 
-  fn new() -> Result<DBConnection> {
+  fn new(root_dir: &PathBuf) -> Result<DBConnection> {
     // Load the database from disk, if no database exists, create a new one.
+    let db_path = root_dir.join("catalog.namespace");
     match PickleDb::load(
-      "./database/catalog.namespace",
+      &db_path,
       pickledb::PickleDbDumpPolicy::AutoDump,
       pickledb::SerializationMethod::Json,
     ) {
       Ok(conn) => Ok(DBConnection(conn)),
       Err(_) => {
         let conn = PickleDb::new(
-          "./database/catalog.namespace",
+          &db_path,
           pickledb::PickleDbDumpPolicy::AutoDump,
           pickledb::SerializationMethod::Json,
         );
