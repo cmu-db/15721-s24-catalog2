@@ -312,34 +312,7 @@ pub fn rename_table(rename_table_request: Json<RenameTableRequest>, db: &State<D
 #[rocket::async_test]
 async fn test_post_table_by_namespace() {
   let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
-  let db_test = DB::new(temp_dir.path().to_path_buf()).expect("failed to create a db");
-
-  let table_metedata_generator = TableMetadataAtomicIncr::new();
-  let mut rocket = rocket::build();
-  rocket = rocket
-    .manage(db_test)
-    .manage(table_metedata_generator)
-    .attach(namespace::stage())
-    .attach(catches::stage())
-    .mount(
-      "/v1",
-      routes![
-        table::get_table_by_namespace,
-        table::post_table_by_namespace,
-        table::register_table,
-        table::get_table,
-        table::post_table,
-        table::delete_table,
-        table::head_table,
-        table::rename_table,
-        metric::post_metrics,
-        config::get_config,
-      ],
-    );
-
-  let client = Client::tracked(rocket)
-    .await
-    .expect("valid rocket instance");
+  let client = create_mock_client(temp_dir.path().to_path_buf()).await;
 
   let namespace_name = "lala";
   let create_namespace_request = CreateNamespaceRequest {
@@ -359,18 +332,50 @@ async fn test_post_table_by_namespace() {
 
   assert_eq!(response.status(), Status::Ok);
 
+  // Uncomment the following code once you have implemented the create_table function
   // let create_table_request = CreateTableRequest {
-  //   name: "table_name".to_string(),
+  //     name: "table_name".to_string(),
   // };
   // let create_table_request_json = Json(create_table_request);
   // let json_bytes = serde_json::to_vec(&create_table_request_json.into_inner()).unwrap();
 
   // let response = client
-  //   .post(format!("/v1/namespaces/{}/tables", namespace_name))
-  //   .header(ContentType::JSON)
-  //   .body(json_bytes)
-  //   .dispatch()
-  //   .await;
+  //     .post(format!("/v1/namespaces/{}/tables", namespace_name))
+  //     .header(ContentType::JSON)
+  //     .body(json_bytes)
+  //     .dispatch()
+  //     .await;
 
   // assert_eq!(response.status(), Status::Ok);
+}
+
+async fn create_mock_client(temp_dir: PathBuf) -> Client {
+  let db_test = DB::new(temp_dir).expect("failed to create a db");
+
+  let table_metadata_generator = TableMetadataAtomicIncr::new();
+  let mut rocket = rocket::build();
+  rocket = rocket
+    .manage(db_test)
+    .manage(table_metadata_generator)
+    .attach(namespace::stage())
+    .attach(catches::stage())
+    .mount(
+      "/v1",
+      routes![
+        table::get_table_by_namespace,
+        table::post_table_by_namespace,
+        table::register_table,
+        table::get_table,
+        table::post_table,
+        table::delete_table,
+        table::head_table,
+        table::rename_table,
+        metric::post_metrics,
+        config::get_config,
+      ],
+    );
+
+  Client::tracked(rocket)
+    .await
+    .expect("valid rocket instance")
 }
