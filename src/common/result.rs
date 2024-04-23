@@ -7,6 +7,7 @@ use serde_json::Value;
 /// An enum that represents all types of errors that can occur when using calling catalog service.
 #[derive(Clone, Serialize)]
 #[serde(crate = "rocket::serde")]
+#[allow(dead_code)]
 pub enum ErrorType {
   BadRequest,
   NotFound,

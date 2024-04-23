@@ -1,16 +1,12 @@
-use std::rc::Rc;
-
 use crate::{
   common::result::{ErrorType, Location, Result},
   err,
   server::routes::common::*,
-  util::time,
 };
 use rocket::{
   serde::{Deserialize, Serialize},
   State,
 };
-use serde_json::{json, Value};
 
 // use crate::Location::Namespace; // TODO: update
 use crate::catalog::namespace::Namespace;
@@ -80,7 +76,7 @@ impl Table {
     // add the table to the namespace tables
     if let Some(mut namespace_instance) = conn.get::<Namespace>(&namespace_key) {
       namespace_instance.tables.push(table_clone.clone());
-      conn.put(&namespace_key, &namespace_instance);
+      conn.put(&namespace_key, &namespace_instance)?;
     }
 
     Ok(new_table)
