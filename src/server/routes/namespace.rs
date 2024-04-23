@@ -1,6 +1,5 @@
 use crate::catalog::namespace::{Namespace, NamespaceIdent};
 use crate::common::result::{self, EmptyResult, ErrorType, JsonResult, Location, Result};
-use crate::table::create_mock_client;
 use crate::{err, ok_empty, ok_json};
 use std::collections::HashSet;
 
@@ -17,13 +16,6 @@ use rocket::{
 use crate::db::DB;
 
 pub struct NamespaceParam(pub Vec<NamespaceIdent>);
-
-use super::*;
-use crate::request::*;
-use rocket::http::ContentType;
-use rocket::http::Status;
-use rocket::local::asynchronous::Client;
-use rocket::response::{content, status};
 
 /// Returns an instance of `PasteId` if the path segment is a valid ID.
 /// Otherwise returns the invalid ID as the `Err` value.
@@ -199,196 +191,204 @@ pub fn stage() -> rocket::fairing::AdHoc {
   })
 }
 
-#[rocket::async_test]
-async fn test_list_non_exist_namespace() {
-  let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
-  let client = create_mock_client(temp_dir.path().to_path_buf()).await;
+#[cfg(test)]
+mod test {
+  use super::*;
+  use crate::table::test::create_mock_client;
+  use rocket::http::ContentType;
+  use rocket::http::Status;
 
-  let namespace_name = "parentnonexist";
-  let endpoint = format!("/v1/namespaces?parent={}", namespace_name);
+  #[rocket::async_test]
+  async fn test_list_non_exist_namespace() {
+    let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
+    let client = create_mock_client(temp_dir.path().to_path_buf()).await;
 
-  let response = client
-    .get(&endpoint)
-    .header(ContentType::JSON)
-    .dispatch()
-    .await;
+    let namespace_name = "parentnonexist";
+    let endpoint = format!("/v1/namespaces?parent={}", namespace_name);
 
-  assert_eq!(response.status(), Status::NotFound);
-}
+    let response = client
+      .get(&endpoint)
+      .header(ContentType::JSON)
+      .dispatch()
+      .await;
 
-#[rocket::async_test]
-async fn test_list_namespace() {
-  let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
-  let client = create_mock_client(temp_dir.path().to_path_buf()).await;
+    assert_eq!(response.status(), Status::NotFound);
+  }
 
-  let namespace_name = "";
-  let endpoint = format!("/v1/namespaces?parent={}", namespace_name);
+  #[rocket::async_test]
+  async fn test_list_namespace() {
+    let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
+    let client = create_mock_client(temp_dir.path().to_path_buf()).await;
 
-  let response = client
-    .get(&endpoint)
-    .header(ContentType::JSON)
-    .dispatch()
-    .await;
+    let namespace_name = "";
+    let endpoint = format!("/v1/namespaces?parent={}", namespace_name);
 
-  assert_eq!(response.status(), Status::NotFound); // TODO: FIXME: NotFound Or Ok?
-}
+    let response = client
+      .get(&endpoint)
+      .header(ContentType::JSON)
+      .dispatch()
+      .await;
 
-#[rocket::async_test]
-async fn test_create_namespace() {
-  let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
-  let client = create_mock_client(temp_dir.path().to_path_buf()).await;
+    assert_eq!(response.status(), Status::NotFound); // TODO: FIXME: NotFound Or Ok?
+  }
 
-  let namespace_name = "create_namespace";
-  let endpoint = format!("/v1/namespaces/");
+  #[rocket::async_test]
+  async fn test_create_namespace() {
+    let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
+    let client = create_mock_client(temp_dir.path().to_path_buf()).await;
 
-  let create_namespace_request = CreateNamespaceRequest {
-    namespace: vec![namespace_name.to_string()], // Use String directly
-    properties: None,                            // Adjust as needed
-  };
-  let create_namespace_request_json = Json(create_namespace_request);
-  let create_namespace_request_json_bytes =
-    serde_json::to_vec(&create_namespace_request_json.into_inner()).unwrap();
+    let namespace_name = "create_namespace";
+    let endpoint = format!("/v1/namespaces/");
 
-  let response = client
-    .post(endpoint)
-    .header(ContentType::JSON)
-    .body(create_namespace_request_json_bytes)
-    .dispatch()
-    .await;
+    let create_namespace_request = CreateNamespaceRequest {
+      namespace: vec![namespace_name.to_string()], // Use String directly
+      properties: None,                            // Adjust as needed
+    };
+    let create_namespace_request_json = Json(create_namespace_request);
+    let create_namespace_request_json_bytes =
+      serde_json::to_vec(&create_namespace_request_json.into_inner()).unwrap();
 
-  assert_eq!(response.status(), Status::Ok);
-}
+    let response = client
+      .post(endpoint)
+      .header(ContentType::JSON)
+      .body(create_namespace_request_json_bytes)
+      .dispatch()
+      .await;
 
-#[rocket::async_test]
-async fn test_get_non_exist_namespace() {
-  let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
-  let client = create_mock_client(temp_dir.path().to_path_buf()).await;
+    assert_eq!(response.status(), Status::Ok);
+  }
 
-  let namespace_name = "nonexist";
-  let endpoint = format!("/v1/namespaces/{}", namespace_name);
+  #[rocket::async_test]
+  async fn test_get_non_exist_namespace() {
+    let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
+    let client = create_mock_client(temp_dir.path().to_path_buf()).await;
 
-  let response = client.get(&endpoint).dispatch().await;
+    let namespace_name = "nonexist";
+    let endpoint = format!("/v1/namespaces/{}", namespace_name);
 
-  assert_eq!(response.status(), Status::NotFound);
-}
+    let response = client.get(&endpoint).dispatch().await;
 
-#[rocket::async_test]
-async fn test_get_namespace() {
-  let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
-  let client = create_mock_client(temp_dir.path().to_path_buf()).await;
+    assert_eq!(response.status(), Status::NotFound);
+  }
 
-  let namespace_name = "exist";
-  let endpoint = format!("/v1/namespaces/");
+  #[rocket::async_test]
+  async fn test_get_namespace() {
+    let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
+    let client = create_mock_client(temp_dir.path().to_path_buf()).await;
 
-  let create_namespace_request = CreateNamespaceRequest {
-    namespace: vec![namespace_name.to_string()], // Use String directly
-    properties: None,                            // Adjust as needed
-  };
-  let create_namespace_request_json = Json(create_namespace_request);
-  let create_namespace_request_json_bytes =
-    serde_json::to_vec(&create_namespace_request_json.into_inner()).unwrap();
+    let namespace_name = "exist";
+    let endpoint = format!("/v1/namespaces/");
 
-  let response = client
-    .post(endpoint)
-    .header(ContentType::JSON)
-    .body(create_namespace_request_json_bytes)
-    .dispatch()
-    .await;
+    let create_namespace_request = CreateNamespaceRequest {
+      namespace: vec![namespace_name.to_string()], // Use String directly
+      properties: None,                            // Adjust as needed
+    };
+    let create_namespace_request_json = Json(create_namespace_request);
+    let create_namespace_request_json_bytes =
+      serde_json::to_vec(&create_namespace_request_json.into_inner()).unwrap();
 
-  assert_eq!(response.status(), Status::Ok);
+    let response = client
+      .post(endpoint)
+      .header(ContentType::JSON)
+      .body(create_namespace_request_json_bytes)
+      .dispatch()
+      .await;
 
-  let endpoint = format!("/v1/namespaces/{}", namespace_name);
+    assert_eq!(response.status(), Status::Ok);
 
-  let response = client.get(&endpoint).dispatch().await;
+    let endpoint = format!("/v1/namespaces/{}", namespace_name);
 
-  assert_eq!(response.status(), Status::Ok);
-}
+    let response = client.get(&endpoint).dispatch().await;
 
-#[rocket::async_test]
-async fn test_check_namespace_exist() {
-  let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
-  let client = create_mock_client(temp_dir.path().to_path_buf()).await;
+    assert_eq!(response.status(), Status::Ok);
+  }
 
-  let namespace_name = "exist";
-  let endpoint = format!("/v1/namespaces/");
+  #[rocket::async_test]
+  async fn test_check_namespace_exist() {
+    let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
+    let client = create_mock_client(temp_dir.path().to_path_buf()).await;
 
-  let create_namespace_request = CreateNamespaceRequest {
-    namespace: vec![namespace_name.to_string()], // Use String directly
-    properties: None,                            // Adjust as needed
-  };
-  let create_namespace_request_json = Json(create_namespace_request);
-  let create_namespace_request_json_bytes =
-    serde_json::to_vec(&create_namespace_request_json.into_inner()).unwrap();
+    let namespace_name = "exist";
+    let endpoint = format!("/v1/namespaces/");
 
-  let response = client
-    .post(endpoint)
-    .header(ContentType::JSON)
-    .body(create_namespace_request_json_bytes)
-    .dispatch()
-    .await;
+    let create_namespace_request = CreateNamespaceRequest {
+      namespace: vec![namespace_name.to_string()], // Use String directly
+      properties: None,                            // Adjust as needed
+    };
+    let create_namespace_request_json = Json(create_namespace_request);
+    let create_namespace_request_json_bytes =
+      serde_json::to_vec(&create_namespace_request_json.into_inner()).unwrap();
 
-  assert_eq!(response.status(), Status::Ok);
+    let response = client
+      .post(endpoint)
+      .header(ContentType::JSON)
+      .body(create_namespace_request_json_bytes)
+      .dispatch()
+      .await;
 
-  let endpoint = format!("/v1/namespaces/{}", namespace_name);
+    assert_eq!(response.status(), Status::Ok);
 
-  let response = client.head(&endpoint).dispatch().await;
+    let endpoint = format!("/v1/namespaces/{}", namespace_name);
 
-  assert_eq!(response.status(), Status::NoContent);
-}
+    let response = client.head(&endpoint).dispatch().await;
 
-#[rocket::async_test]
-async fn test_check_namespace_non_exist() {
-  let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
-  let client = create_mock_client(temp_dir.path().to_path_buf()).await;
+    assert_eq!(response.status(), Status::NoContent);
+  }
 
-  let namespace_name = "nonexist";
-  let endpoint = format!("/v1/namespaces/{}", namespace_name);
+  #[rocket::async_test]
+  async fn test_check_namespace_non_exist() {
+    let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
+    let client = create_mock_client(temp_dir.path().to_path_buf()).await;
 
-  let response = client.head(&endpoint).dispatch().await;
+    let namespace_name = "nonexist";
+    let endpoint = format!("/v1/namespaces/{}", namespace_name);
 
-  assert_eq!(response.status(), Status::NotFound);
-}
+    let response = client.head(&endpoint).dispatch().await;
 
-#[rocket::async_test]
-async fn test_delete_exist_namespace() {
-  let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
-  let client = create_mock_client(temp_dir.path().to_path_buf()).await;
+    assert_eq!(response.status(), Status::NotFound);
+  }
 
-  let namespace_name = "exist";
-  let endpoint = format!("/v1/namespaces/");
+  #[rocket::async_test]
+  async fn test_delete_exist_namespace() {
+    let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
+    let client = create_mock_client(temp_dir.path().to_path_buf()).await;
 
-  let create_namespace_request = CreateNamespaceRequest {
-    namespace: vec![namespace_name.to_string()], // Use String directly
-    properties: None,                            // Adjust as needed
-  };
-  let create_namespace_request_json = Json(create_namespace_request);
-  let create_namespace_request_json_bytes =
-    serde_json::to_vec(&create_namespace_request_json.into_inner()).unwrap();
+    let namespace_name = "exist";
+    let endpoint = format!("/v1/namespaces/");
 
-  let response = client
-    .post(endpoint)
-    .header(ContentType::JSON)
-    .body(create_namespace_request_json_bytes)
-    .dispatch()
-    .await;
+    let create_namespace_request = CreateNamespaceRequest {
+      namespace: vec![namespace_name.to_string()], // Use String directly
+      properties: None,                            // Adjust as needed
+    };
+    let create_namespace_request_json = Json(create_namespace_request);
+    let create_namespace_request_json_bytes =
+      serde_json::to_vec(&create_namespace_request_json.into_inner()).unwrap();
 
-  assert_eq!(response.status(), Status::Ok);
+    let response = client
+      .post(endpoint)
+      .header(ContentType::JSON)
+      .body(create_namespace_request_json_bytes)
+      .dispatch()
+      .await;
 
-  // delete
-  let endpoint_delete = format!("/v1/namespaces/{}", namespace_name);
-  let response = client.delete(endpoint_delete).dispatch().await;
+    assert_eq!(response.status(), Status::Ok);
 
-  assert_eq!(response.status(), Status::NoContent);
-}
+    // delete
+    let endpoint_delete = format!("/v1/namespaces/{}", namespace_name);
+    let response = client.delete(endpoint_delete).dispatch().await;
 
-#[rocket::async_test]
-async fn test_delete_non_exist_namespace() {
-  let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
-  let client = create_mock_client(temp_dir.path().to_path_buf()).await;
+    assert_eq!(response.status(), Status::NoContent);
+  }
 
-  let namespace_name = "nonexist";
-  let endpoint_delete = format!("/v1/namespaces/{}", namespace_name);
-  let response = client.delete(endpoint_delete).dispatch().await;
+  #[rocket::async_test]
+  async fn test_delete_non_exist_namespace() {
+    let temp_dir = tempfile::tempdir().expect("failed to create a temporary directory");
+    let client = create_mock_client(temp_dir.path().to_path_buf()).await;
 
-  assert_eq!(response.status(), Status::NotFound);
+    let namespace_name = "nonexist";
+    let endpoint_delete = format!("/v1/namespaces/{}", namespace_name);
+    let response = client.delete(endpoint_delete).dispatch().await;
+
+    assert_eq!(response.status(), Status::NotFound);
+  }
 }
