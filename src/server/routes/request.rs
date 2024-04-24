@@ -20,6 +20,7 @@ pub struct CreateTableRequest {
 
 #[derive(Deserialize)]
 #[serde(crate = "rocket::serde")]
+#[allow(dead_code)]
 pub struct RegisterTableRequest {
   name: String,
   #[serde(rename = "metadata-location")]
@@ -78,6 +79,7 @@ pub enum TableUpdate {
 }
 
 #[derive(FromForm)]
+#[allow(dead_code)]
 pub struct PurgeRequested {
   purge_requested: Option<bool>,
 }
