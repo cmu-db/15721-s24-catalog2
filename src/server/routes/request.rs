@@ -8,7 +8,7 @@ use rocket::serde::Serialize;
 pub struct CreateTableRequest {
   pub name: String,
   // location: Option<String>,
-  schema: Schema,
+  // schema: Schema,
   // #[serde(rename = "partition-spec")]
   // partition_spec: PartitionSpec,
   // #[serde(rename = "write-order")]
