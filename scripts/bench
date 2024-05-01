@@ -110,18 +110,24 @@ print(f"Seeded {len(namespaces)} namespaces and {len(namespaces) * table_per_nam
 
 # test begins
 # 1. single endpoint stress test
-STATISTIC_FILE = f"{TEST_ROOT_DIR}/results.bin"
 namespace = namespaces[0]
 table = namespace['tables'][0]
-target = f"{args.base_url}/{NAMESPACE_ENDPOINT}/{namespace['name']}/{TABLE_ENDPOINT}/{table}"
-#attack = f"echo 'GET {target}' | vegeta attack -duration=60s | tee {STATISTIC_FILE} | vegeta report"
-attack = f"echo 'GET {target}' | vegeta attack -rate={args.rate} -duration=60s | tee {STATISTIC_FILE} | vegeta report"
-run(attack, note="single endpoint stress test",
-    out=f"{TEST_ROOT_DIR}/veneta.log")
-if args.plot:
-    PLOT_FILE = f"{TEST_ROOT_DIR}/plot.html"
-    run(f"cat {STATISTIC_FILE} | vegeta plot > {PLOT_FILE}",
-        note="generating plot")
+targets = {
+    "get_table": f"{args.base_url}/{NAMESPACE_ENDPOINT}/{namespace['name']}/{TABLE_ENDPOINT}/{table}",
+    "list_table": f"{args.base_url}/{NAMESPACE_ENDPOINT}/{namespace['name']}/{TABLE_ENDPOINT}",
+    "get_namespace": f"{args.base_url}/{NAMESPACE_ENDPOINT}/{namespace['name']}",
+    "list_table": f"{args.base_url}/{NAMESPACE_ENDPOINT}"
+}
+
+for name, target in targets.items():
+    STATISTIC_FILE = f"{TEST_ROOT_DIR}/results_{name}.bin"
+    attack = f"echo 'GET {target}' | vegeta attack -rate={args.rate} -duration=10s | tee {STATISTIC_FILE} | vegeta report"
+    run(attack, note="single endpoint stress test",
+        out=f"{TEST_ROOT_DIR}/veneta_{name}.log")
+    if args.plot:
+        PLOT_FILE = f"{TEST_ROOT_DIR}/plot_{name}.html"
+        run(f"cat {STATISTIC_FILE} | vegeta plot > {PLOT_FILE}",
+            note="generating plot")
 # ... more?
 
 # clean up
