@@ -116,7 +116,7 @@ targets = {
     "get_table": f"{args.base_url}/{NAMESPACE_ENDPOINT}/{namespace['name']}/{TABLE_ENDPOINT}/{table}",
     "list_table": f"{args.base_url}/{NAMESPACE_ENDPOINT}/{namespace['name']}/{TABLE_ENDPOINT}",
     "get_namespace": f"{args.base_url}/{NAMESPACE_ENDPOINT}/{namespace['name']}",
-    "list_table": f"{args.base_url}/{NAMESPACE_ENDPOINT}"
+    "list_namespace": f"{args.base_url}/{NAMESPACE_ENDPOINT}"
 }
 
 for name, target in targets.items():
