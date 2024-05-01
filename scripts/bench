@@ -62,7 +62,7 @@ parser.add_argument("-n", "--namespace_num", type=int,
                     default=DEFAULT_NAMESPACE_NUM, help="The number of namespace to seed in catalog.")
 parser.add_argument("-t", "--table_num", type=int,
                     default=DEFAULT_TABLE_NUM, help="The number of table to seed in catalog.")
-parser.add_argument("-r", "--rate", type=float,
+parser.add_argument("-r", "--rate", type=int,
                     default=DEFAULT_RATE, help="Request rate.")
 parser.add_argument("-p", "--plot", action="store_true",
                     default=False, help="Generate a plot of this benchmark.")
@@ -114,7 +114,8 @@ STATISTIC_FILE = f"{TEST_ROOT_DIR}/results.bin"
 namespace = namespaces[0]
 table = namespace['tables'][0]
 target = f"{args.base_url}/{NAMESPACE_ENDPOINT}/{namespace['name']}/{TABLE_ENDPOINT}/{table}"
-attack = f"echo 'GET {target}' | vegeta attack -duration=10s | tee {STATISTIC_FILE} | vegeta report"
+#attack = f"echo 'GET {target}' | vegeta attack -duration=60s | tee {STATISTIC_FILE} | vegeta report"
+attack = f"echo 'GET {target}' | vegeta attack -rate={args.rate} -duration=60s | tee {STATISTIC_FILE} | vegeta report"
 run(attack, note="single endpoint stress test",
     out=f"{TEST_ROOT_DIR}/veneta.log")
 if args.plot:
