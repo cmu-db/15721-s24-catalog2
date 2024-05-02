@@ -122,13 +122,44 @@ targets = {
 for name, target in targets.items():
     STATISTIC_FILE = f"{TEST_ROOT_DIR}/results_{name}.bin"
     attack = f"echo 'GET {target}' | vegeta attack -rate={args.rate} -duration=10s | tee {STATISTIC_FILE} | vegeta report"
-    run(attack, note="single endpoint stress test",
+    run(attack, note=f"single endpoint stress test for {name}",
         out=f"{TEST_ROOT_DIR}/veneta_{name}.log")
     if args.plot:
         PLOT_FILE = f"{TEST_ROOT_DIR}/plot_{name}.html"
         run(f"cat {STATISTIC_FILE} | vegeta plot > {PLOT_FILE}",
             note="generating plot")
 # ... more?
+
+
+# 2. random endpoint stress test
+# Define the file path
+PATH_TARGET_FILE = f"{TEST_ROOT_DIR}/requests_get_table.txt"
+
+# Write the URLs to the file
+with open(PATH_TARGET_FILE, "w") as file:
+    # for i in range(len(namespaces)):
+    for i in range(5):
+        random_namespace = random.choice(namespaces)
+        random_table = random.choice(tables)
+
+        # Generate request URL
+        target = f"{args.base_url}/{NAMESPACE_ENDPOINT}/{random_namespace['name']}/{TABLE_ENDPOINT}/{random_table}"
+        request_url = f"GET {target}"
+
+        file.write(request_url + "\n")
+
+print("URLs have been written to", PATH_TARGET_FILE)
+
+
+STATISTIC_FILE = f"{TEST_ROOT_DIR}/results.bin"
+attack = f"vegeta attack -targets={PATH_TARGET_FILE} -rate={args.rate} -duration=10s | tee {STATISTIC_FILE} | vegeta report"
+run(attack, note="single endpoint stress test",
+    out=f"{TEST_ROOT_DIR}/veneta.log")
+if args.plot:
+    PLOT_FILE = f"{TEST_ROOT_DIR}/plot.html"
+    run(f"cat {STATISTIC_FILE} | vegeta plot > {PLOT_FILE}",
+        note="generating plot")
+
 
 # clean up
 catalog_server.send_signal(signal.SIGINT)
