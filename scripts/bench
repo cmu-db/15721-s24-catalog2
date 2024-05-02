@@ -140,7 +140,7 @@ with open(PATH_TARGET_FILE, "w") as file:
     # for i in range(len(namespaces)):
     for i in range(5):
         random_namespace = random.choice(namespaces)
-        random_table = random.choice(tables)
+        random_table = random.choice(random_namespace['tables'])
 
         # Generate request URL
         target = f"{args.base_url}/{NAMESPACE_ENDPOINT}/{random_namespace['name']}/{TABLE_ENDPOINT}/{random_table}"
@@ -151,12 +151,12 @@ with open(PATH_TARGET_FILE, "w") as file:
 print("URLs have been written to", PATH_TARGET_FILE)
 
 
-STATISTIC_FILE = f"{TEST_ROOT_DIR}/results.bin"
+STATISTIC_FILE = f"{TEST_ROOT_DIR}/results_random.bin"
 attack = f"vegeta attack -targets={PATH_TARGET_FILE} -rate={args.rate} -duration=10s | tee {STATISTIC_FILE} | vegeta report"
-run(attack, note="single endpoint stress test",
-    out=f"{TEST_ROOT_DIR}/veneta.log")
+run(attack, note="random endpoints stress test",
+    out=f"{TEST_ROOT_DIR}/veneta_random.log")
 if args.plot:
-    PLOT_FILE = f"{TEST_ROOT_DIR}/plot.html"
+    PLOT_FILE = f"{TEST_ROOT_DIR}/plot_random.html"
     run(f"cat {STATISTIC_FILE} | vegeta plot > {PLOT_FILE}",
         note="generating plot")
 
