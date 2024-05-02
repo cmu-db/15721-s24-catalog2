@@ -20,12 +20,18 @@ The parameters for request and response can be referenced from [REST API](https:
 
 ### Use Cases
 #### Namespace
-create/delete/rename/list namespace
+* create namespace
+* delete namespace
+* rename namespace
+* list namespaces
 #### Table
-create/delete/rename/list table 
-
-#### Query Table’s Metadata (including statistics, version, table-uuid, location, last-column-id, schema, and partition-spec)
-get metadeta by {namespace}/{table}
+* create table
+* delete table
+* rename table
+* list tables
+#### Query Table’s Metadata
+* get metadeta by {namespace}/{table}
+* metadata includes statistics, version, table-uuid, location, last-column-id, schema, and partition-spec.
 
 ## Design Rationale
 * Correctness:
@@ -47,13 +53,24 @@ get metadeta by {namespace}/{table}
 To ensure the quality and the performance of the catalog implemented, a comprehensive testing strategy is a must. Our testing strategy will include both functional and non-functional aspects of our catalog service. 
 
 * Functional testing
-  * API tests: For functional testing, we can achieve the goal through unit tests. We will test each API endpoint implemented in our project to ensure correct behavior. We will test various input parameters and validate the response format and the status code are as expected. Also, we will try to mimic possible edge cases and errors to ensure the implementation is robust and can perform suitable error handling. By doing so, we can ensure the API works as expected and provides correct results to clients. 
-  * Metadata tests: We will focus on verifying the correct storage and retrieval of metadata. Tests will include different scenarios, including some edge cases. [Quickcheck](https://github.com/BurntSushi/quickcheck) is an example for performing the testing.
+  * API tests: For functional testing, we achieve the goal through unit tests. We test each API endpoint implemented in our project to ensure correct behavior. We test various input parameters and validate the response format and the status code are as expected. Also, we try to mimic possible edge cases and errors to ensure the implementation is robust and can perform suitable error handling. By doing so, we ensure the API works as expected and provides correct results to clients.
+
+  * Namespace: Namespace tests include list_namespace [non_exist (404) / exist (200)], create_namespace [(200)], get_namespace [non_exist (404) / exist (200)], check_namespace [non_exist (404) / exist (204)], and delete_namespace [non_exist (404) / exist (204)].
+
+  * Table: Table tests include get_table_by_namespace [empty_result (404) / result_found (200)], post_table_by_namespace [new_table (200) / conflict (409)], delete_table [table_exists (204) / table_not_exists (404)], head_table [table_exists (204) / table_not_exists (404)], and rename_table [(204)].
+
+  <!-- * Metadata tests: We will focus on verifying the correct storage and retrieval of metadata. Tests will include different scenarios, including some edge cases. [Quickcheck](https://github.com/BurntSushi/quickcheck) is an example for performing the testing. -->
+
 * Benchmark testing
-  * Key performance metrics: Latency and Request Per Second (RPS) would be used as key metrics.
-  * Workload: Since we are working on an OLAP database, the workload expected should be read-heavy. We thus expect read-heavy and write-occasional workloads that include complex joins and predicates, analytical queries, periodic updates on catalog data, and some metadata updates. Based on this assumption, we plan to evaluate 3 different read-to-write ratios: 1000:1, 100:1, and 10:1.
-  * Performance evaluation: We can use [ali](https://github.com/nakabonne/ali) to create HTTP traffic and visualize the outcomes in real-time for performance evaluation. 
-  * Performance optimization: We can use [Criterion.rs](https://github.com/bheisler/criterion.rs?tab=readme-ov-file#features) and [bencher](https://github.com/bluss/bencher) to collect statistics to enable statistics-driven optimizations. In addition, we can set up a performance baseline to compare the performance with our implementation. We can measure different metrics, for example, response time, throughput, etc.  
+  * Performance evaluation: We use [Vegeta](https://github.com/tsenart/vegeta) to create HTTP traffic and visualize the outcomes in real-time for performance evaluation.
+
+  * Key performance metrics: Latency and Request Per Second (RPS).
+
+  * Workload: Since we are working on an OLAP database, the workload expected should be read-heavy, including complex joins, predicates, and analytical queries. Based on this assumption, we plan to evaluate 2 different scenarios: Single endpoint and Random endpoints stress test. Single endpoint stress tests include get_table, list_table, get_namespace, and list_namespace. Random endpoints stress test includes get_random_table.
+
+  <!-- * Workload: Since we are working on an OLAP database, the workload expected should be read-heavy. We thus expect read-heavy and write-occasional workloads that include complex joins and predicates, analytical queries, periodic updates on catalog data, and some metadata updates. Based on this assumption, we plan to evaluate 3 different read-to-write ratios: 1000:1, 100:1, and 10:1. -->
+
+  <!-- * Performance optimization: We can use [Criterion.rs](https://github.com/bheisler/criterion.rs?tab=readme-ov-file#features) and [bencher](https://github.com/bluss/bencher) to collect statistics to enable statistics-driven optimizations. In addition, we can set up a performance baseline to compare the performance with our implementation. We can measure different metrics, for example, response time, throughput, etc.   -->
   
 
 ## Trade-offs and Potential Problems
