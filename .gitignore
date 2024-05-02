@@ -17,3 +17,7 @@ Cargo.lock
 .DS_Store
 
 .vscode
+
+database
+
+test/
